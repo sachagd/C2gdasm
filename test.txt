@@ -1,0 +1,43 @@
+https://geode-sdk.org/me
+
+mettre 9980 dans esp au tout début
+
+9981-9982 : temp mem
+9983 : program counter
+9984-9991 : %eax, %ebx, %ecx, %edx, %esi, %edi, %ebp, %esp
+9992 : zero flag
+9993 : sign flag
+9994 : overflow flag
+9995 : arg1
+9996 : arg1 value
+9997 : arg2
+9998 : arg2 value
+9999 : result
+
+pc specs : 
+
+cpu : 32 bits, 8 registers, 200Hz clock speed
+RAM : 40KB
+
+trucs qui pourrait être fait : 
+    - jle qui fait pas vraiment un où, si les deux conditions sont vérifiées alors le pc est changé deux fois
+    - pour enlever des appels de groupes sur les jumps, copier coller les triggers directement dans le code 
+    - quand la src est un immediate, je voulais faire un truc mais je sais plus (lmao)
+
+
+groupe 230 :
+    1579 : fonctionne pas 
+    1581 : fonctionne pas 
+    1583 : fonctionne pas 
+    1585 : fonctionne pas 
+    1587 : fonctionne pas 
+    1589 : fonctionne pas 
+    1591 : fonctionne pas 
+    1593 : fonctionne pas 
+    1595 : fonctionne pas 
+    1597 : fonctionne pas 
+    1599 : fonctionne pas 
+    1601 : fonctionne
+    1603 : fonctionne
+    1605 : fonctionne
+    1607 : fonctionne pas
