@@ -100,14 +100,8 @@ let instructionf code label_references instruction =
   |Jne(target) -> code := [[|100; 9995; get_label target label_references|];[|21|]]::!code;
 
   |Call(target) -> code := [[|100; 9995; get_label target label_references|];[|22|]]::!code;
-    (* cpu.regs.esp <- cpu.regs.esp - 1;
-    cpu.memory.(cpu.regs.esp) <- cpu.pc + 1;
-    jump cpu target label_references *)
 
   |Ret -> code := [[|23|]]::!code;
-    (* let ret_addr = cpu.memory.(cpu.regs.esp) in
-    cpu.regs.esp <- cpu.regs.esp + 1;
-    cpu.pc <- ret_addr  *)
 
   | _ -> failwith "invalid instruction"
 
