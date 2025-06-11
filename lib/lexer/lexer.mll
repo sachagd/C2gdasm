@@ -18,25 +18,49 @@ rule token = parse
   | "$" not_separator+ as s         { IMMEDIATE s }
   | ['-']? ['0'-'9']+ as num        { NUMBER (int_of_string num) }
 
-  | "addl"       { ADDL }
-  | "pushl"      { PUSHL }
-  | "movb"       { MOVB }
-  | "movl"       { MOVL }
-  | "andl"       { ANDL }
-  | "subl"       { SUBL }
-  | "call"       { CALL }
-  | "jmp"        { JMP }
-  | "jne"        { JNE }
-  | "je"         { JE }
-  | "jl"         { JL }
-  | "jle"        { JLE }
-  | "cmpb"       { CMPB }
-  | "cmpl"       { CMPL }
+  | "addb"       { ADD }
+  | "addw"       { ADD }
+  | "addl"       { ADD }
+  | "subb"       { SUB }
+  | "subw"       { SUB }
+  | "subl"       { SUB }
+  | "cmpb"       { CMP }
+  | "cmpw"       { CMP }
+  | "cmpl"       { CMP }
   | "cltd"       { CLTD }
   | "idivl"      { IDIVL }
-  | "ret"        { RET }
-  | "xorl"       { XORL }
+  | "andb"       { ANDB }
+  | "andw"       { ANDW }
+  | "andl"       { ANDL }
+  | "testb"      { TESTB }
+  | "testw"      { TESTW }
   | "testl"      { TESTL }
+  | "xorb"       { XORB }
+  | "xorw"       { XORW }
+  | "xorl"       { XORL }
+  | "pushl"      { PUSHL }
+  | "movb"       { MOV }
+  | "movw"       { MOV }
+  | "movl"       { MOV }
+  | "jmp"        { JMP }
+  | "jl"         { JL }
+  | "jnl"        { JNL }
+  | "jle"        { JLE }
+  | "jnle"       { JNLE }
+  | "je"         { JE }
+  | "jne"        { JNE }
+  | "jo"         { JO }
+  | "jno"        { JNO }
+  | "js"         { JS }
+  | "jns"        { JNS }
+  | "jz"         { JZ }
+  | "jnz"        { JNZ }
+  | "jg"         { JG }
+  | "jng"        { JNG }
+  | "jge"        { JGE }
+  | "jnge"       { JNGE }
+  | "call"       { CALL }
+  | "ret"        { RET }
   | "leave"      { LEAVE }
 
   | ","                             { COMMA }

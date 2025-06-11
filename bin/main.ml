@@ -29,14 +29,14 @@ let fprogramf (Program(functions)) =
 
 let get_register reg = 
   match reg with 
-  |"%eax" -> 9984
-  |"%ebx" -> 9985
-  |"%ecx" -> 9986
-  |"%edx" -> 9987
-  |"%esi" -> 9988
-  |"%edi" -> 9989
-  |"%ebp" -> 9990
-  |"%esp" -> 9991
+  |"%eax" -> 9983
+  |"%ebx" -> 9984
+  |"%ecx" -> 9985
+  |"%edx" -> 9986
+  |"%esi" -> 9987
+  |"%edi" -> 9988
+  |"%ebp" -> 9989
+  |"%esp" -> 9990
   | _ -> failwith "unknown register"
 
 let argumentf argument insts argoffset = 
@@ -68,11 +68,11 @@ let get_label target label_references =
 let instructionf code label_references instruction = 
   let insts = ref [] in 
   match instruction with 
-  |Addl(src, dst) -> twoarg_instruction src dst code insts 1
+  |Add(src, dst) -> twoarg_instruction src dst code insts 1
     
-  |Subl(src, dst) -> twoarg_instruction src dst code insts 3
+  |Sub(src, dst) -> twoarg_instruction src dst code insts 3
 
-  |Cmpb(src, dst) |Cmpl(src, dst) -> twoarg_instruction src dst code insts 5
+  |Cmp(src, dst) -> twoarg_instruction src dst code insts 5
 
   |Testl(op1, op2) -> twoarg_instruction op1 op2 code insts 7
 
@@ -87,7 +87,7 @@ let instructionf code label_references instruction =
 
   |Cltd -> code := [[|14|]]::!code
 
-  |Movl(src, dst) |Movb(src, dst) -> twoarg_instruction src dst code insts 15
+  |Mov(src, dst) -> twoarg_instruction src dst code insts 15
 
   |Jmp(target) -> code := [[|100; 9995; get_label target label_references|];[|17|]]::!code;
 

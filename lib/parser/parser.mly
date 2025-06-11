@@ -10,8 +10,11 @@
 %token <int> NUMBER 
 %token <string> IDENT
 %token <string> FUNCTION
-%token ADDL PUSHL MOVL ANDL SUBL CALL JMP CMPB CLTD IDIVL RET
-%token XORL MOVB TESTL JNE CMPL JL JE JLE LEAVE
+%token ADD SUB CMP CLTD IDIVL
+%token ANDB ANDW ANDL TESTB TESTW TESTL XORB XORW XORL
+%token PUSHL MOV
+%token JMP JL JNL JLE JNLE JE JNE JO JNO JS JNS JZ JNZ JG JNG JGE JNGE
+%token CALL RET LEAVE
 %token COMMA LPAREN RPAREN EOF
 
 %start program
@@ -29,25 +32,41 @@ argument:
   | IDENT { Id($1) }
 
 instruction:
-  | ADDL argument COMMA argument  { Addl($2, $4) }
-  | PUSHL argument                { Pushl($2) }
-  | MOVB argument COMMA argument  { Movb($2, $4) }
-  | MOVL argument COMMA argument  { Movl($2, $4) }
-  | ANDL argument COMMA argument  { Andl($2, $4) }
-  | SUBL argument COMMA argument  { Subl($2, $4) }
-  | CALL argument                 { Call($2) }
-  | JMP argument                  { Jmp($2) }
-  | JNE argument                  { Jne($2) }
-  | JE argument                   { Je($2) }
-  | JL argument                   { Jl($2) }
-  | JLE argument                  { Jle($2) }
-  | CMPB argument COMMA argument  { Cmpb($2, $4) }
-  | CMPL argument COMMA argument  { Cmpl($2, $4) }
+  | ADD argument COMMA argument   { Add($2, $4) }
+  | SUB argument COMMA argument   { Sub($2, $4) }
+  | CMP argument COMMA argument   { Cmp($2, $4) }
   | CLTD                          { Cltd }
   | IDIVL argument                { Idivl($2) }
-  | RET                           { Ret }
-  | XORL argument COMMA argument  { Xorl($2, $4) }
+  | ANDB argument COMMA argument  { Andb($2, $4) }
+  | ANDW argument COMMA argument  { Andw($2, $4) }
+  | ANDL argument COMMA argument  { Andl($2, $4) }
+  | TESTB argument COMMA argument { Testb($2, $4) }
+  | TESTW argument COMMA argument { Testw($2, $4) }
   | TESTL argument COMMA argument { Testl($2, $4) }
+  | XORB argument COMMA argument  { Xorb($2, $4) }
+  | XORW argument COMMA argument  { Xorw($2, $4) }
+  | XORL argument COMMA argument  { Xorl($2, $4) }
+  | PUSHL argument                { Pushl($2) }
+  | MOV argument COMMA argument  { Mov($2, $4) }
+  | JMP argument          { Jmp($2) }
+  | JL argument        { Jl($2) }
+  | JNL argument        { Jnl($2) }
+  | JLE argument        { Jle($2) }
+  | JNLE argument        { Jnle($2) }
+  | JE argument        { Je($2) }
+  | JNE argument        { Jne($2) }
+  | JO argument        { Jo($2) }
+  | JNO argument        { Jno($2) }
+  | JS argument        { Js($2) }
+  | JNS argument        { Jns($2) }
+  | JZ argument        { Jz($2) }
+  | JNZ argument        { Jnz($2) }
+  | JG argument        { Jg($2) }
+  | JNG argument        { Jng($2) }
+  | JGE argument        { Jge($2) }
+  | JNGE argument        { Jnge($2) }
+  | CALL argument                 { Call($2) }
+  | RET                           { Ret }
   | LEAVE                         { Leave }
 
 dirarg:
