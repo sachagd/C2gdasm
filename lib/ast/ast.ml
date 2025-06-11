@@ -26,6 +26,8 @@ type instruction =
   | Jle of argument
   | Je of argument
   | Jne of argument
+  | Jo of argument
+  | Jno of argument
   | Leave
   | Call of argument
   | Ret
