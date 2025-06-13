@@ -9,9 +9,15 @@ type argument =
   | Id of string 
 
 type instruction = 
-  | Add of argument * argument
-  | Sub of argument * argument
-  | Cmp of argument * argument
+  | Addb of argument * argument
+  | Addw of argument * argument
+  | Addl of argument * argument
+  | Subb of argument * argument
+  | Subw of argument * argument
+  | Subl of argument * argument
+  | Cmpb of argument * argument
+  | Cmpw of argument * argument
+  | Cmpl of argument * argument
   | Cltd
   | Idivl of argument
   | Andb of argument * argument
@@ -24,7 +30,9 @@ type instruction =
   | Xorw of argument * argument
   | Xorl of argument * argument
   | Pushl of argument
-  | Mov of argument * argument
+  | Movb of argument * argument
+  | Movw of argument * argument
+  | Movl of argument * argument
   | Jmp of argument
   | Jl of argument
   | Jnl of argument

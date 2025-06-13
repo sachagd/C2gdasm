@@ -68,40 +68,70 @@ let get_label target label_references =
 let instructionf code label_references instruction = 
   let insts = ref [] in 
   match instruction with 
-  |Add(src, dst) -> twoarg_instruction src dst code insts 1
+  |Addb(src, dst) -> twoarg_instruction src dst code insts 1
+  |Addw(src, dst) -> twoarg_instruction src dst code insts 3
+  |Addl(src, dst) -> twoarg_instruction src dst code insts 5
     
-  |Sub(src, dst) -> twoarg_instruction src dst code insts 3
+  |Subb(src, dst) -> twoarg_instruction src dst code insts 7
+  |Subw(src, dst) -> twoarg_instruction src dst code insts 9
+  |Subl(src, dst) -> twoarg_instruction src dst code insts 11
 
-  |Cmp(src, dst) -> twoarg_instruction src dst code insts 5
+  |Cmpb(src, dst) -> twoarg_instruction src dst code insts 13
+  |Cmpw(src, dst) -> twoarg_instruction src dst code insts 15
+  |Cmpl(src, dst) -> twoarg_instruction src dst code insts 17
 
-  |Testl(op1, op2) -> twoarg_instruction op1 op2 code insts 7
+  |Andb(src, dst) -> twoarg_instruction src dst code insts 19
+  |Andw(src, dst) -> twoarg_instruction src dst code insts 21
+  |Andl(src, dst) -> twoarg_instruction src dst code insts 23
 
-  |Andl(src, dst) -> twoarg_instruction src dst code insts 9
+  |Testb(op1, op2) -> twoarg_instruction op1 op2 code insts 25
+  |Testw(op1, op2) -> twoarg_instruction op1 op2 code insts 27
+  |Testl(op1, op2) -> twoarg_instruction op1 op2 code insts 29
 
-  |Xorl(src, dst) -> twoarg_instruction src dst code insts 11
+  |Xorb(src, dst) -> twoarg_instruction src dst code insts 31
+  |Xorw(src, dst) -> twoarg_instruction src dst code insts 33
+  |Xorl(src, dst) -> twoarg_instruction src dst code insts 35
     
   |Idivl(op) ->
-    insts := [|13|]::!insts;
+    insts := [|37|]::!insts;
     argumentf op insts 0;
     code := !insts::!code;
 
-  |Cltd -> code := [[|14|]]::!code
+  |Cltd -> code := [[|38|]]::!code
 
-  |Mov(src, dst) -> twoarg_instruction src dst code insts 15
+  |Movb(src, dst) -> twoarg_instruction src dst code insts 39
+  |Movw(src, dst) -> twoarg_instruction src dst code insts 41
+  |Movl(src, dst) -> twoarg_instruction src dst code insts 43
 
-  |Jmp(target) -> code := [[|100; 9995; get_label target label_references|];[|17|]]::!code;
+  |Jmp(target) -> code := [[|100; 9995; get_label target label_references|];[|45|]]::!code;
 
-  |Jl(target) -> code := [[|100; 9995; get_label target label_references|];[|18|]]::!code;
+  |Jl(target) -> code := [[|100; 9995; get_label target label_references|];[|46|]]::!code;
+  |Jnl(target) -> code := [[|100; 9995; get_label target label_references|];[|47|]]::!code;
 
-  |Jle(target) -> code := [[|100; 9995; get_label target label_references|];[|19|]]::!code;
+  |Jle(target) -> code := [[|100; 9995; get_label target label_references|];[|48|]]::!code;
+  |Jnle(target) -> code := [[|100; 9995; get_label target label_references|];[|49|]]::!code;
 
-  |Je(target) -> code := [[|100; 9995; get_label target label_references|];[|20|]]::!code;
+  |Je(target) -> code := [[|100; 9995; get_label target label_references|];[|50|]]::!code;
+  |Jne(target) -> code := [[|100; 9995; get_label target label_references|];[|51|]]::!code;
 
-  |Jne(target) -> code := [[|100; 9995; get_label target label_references|];[|21|]]::!code;
+  |Jo(target) -> code := [[|100; 9995; get_label target label_references|];[|52|]]::!code;
+  |Jno(target) -> code := [[|100; 9995; get_label target label_references|];[|53|]]::!code;
 
-  |Call(target) -> code := [[|100; 9995; get_label target label_references|];[|22|]]::!code;
+  |Js(target) -> code := [[|100; 9995; get_label target label_references|];[|54|]]::!code;
+  |Jns(target) -> code := [[|100; 9995; get_label target label_references|];[|55|]]::!code;
 
-  |Ret -> code := [[|23|]]::!code;
+  |Jz(target) -> code := [[|100; 9995; get_label target label_references|];[|56|]]::!code;
+  |Jnz(target) -> code := [[|100; 9995; get_label target label_references|];[|57|]]::!code;
+
+  |Jg(target) -> code := [[|100; 9995; get_label target label_references|];[|58|]]::!code;
+  |Jng(target) -> code := [[|100; 9995; get_label target label_references|];[|59|]]::!code;
+
+  |Jge(target) -> code := [[|100; 9995; get_label target label_references|];[|60|]]::!code;
+  |Jnge(target) -> code := [[|100; 9995; get_label target label_references|];[|61|]]::!code;
+
+  |Call(target) -> code := [[|100; 9995; get_label target label_references|];[|62|]]::!code;
+
+  |Ret -> code := [[|63|]]::!code;
 
   | _ -> failwith "invalid instruction"
 

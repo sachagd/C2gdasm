@@ -18,15 +18,15 @@ rule token = parse
   | "$" not_separator+ as s         { IMMEDIATE s }
   | ['-']? ['0'-'9']+ as num        { NUMBER (int_of_string num) }
 
-  | "addb"       { ADD }
-  | "addw"       { ADD }
-  | "addl"       { ADD }
-  | "subb"       { SUB }
-  | "subw"       { SUB }
-  | "subl"       { SUB }
-  | "cmpb"       { CMP }
-  | "cmpw"       { CMP }
-  | "cmpl"       { CMP }
+  | "addb"       { ADDB }
+  | "addw"       { ADDW }
+  | "addl"       { ADDL }
+  | "subb"       { SUBB }
+  | "subw"       { SUBW }
+  | "subl"       { SUBL }
+  | "cmpb"       { CMPB }
+  | "cmpw"       { CMPW }
+  | "cmpl"       { CMPL }
   | "cltd"       { CLTD }
   | "idivl"      { IDIVL }
   | "andb"       { ANDB }
@@ -39,9 +39,9 @@ rule token = parse
   | "xorw"       { XORW }
   | "xorl"       { XORL }
   | "pushl"      { PUSHL }
-  | "movb"       { MOV }
-  | "movw"       { MOV }
-  | "movl"       { MOV }
+  | "movb"       { MOVB }
+  | "movw"       { MOVW }
+  | "movl"       { MOVL }
   | "jmp"        { JMP }
   | "jl"         { JL }
   | "jnl"        { JNL }

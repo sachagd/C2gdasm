@@ -10,9 +10,9 @@
 %token <int> NUMBER 
 %token <string> IDENT
 %token <string> FUNCTION
-%token ADD SUB CMP CLTD IDIVL
+%token ADDB ADDW ADDL SUBB SUBW SUBL CMPB CMPW CMPL CLTD IDIVL
 %token ANDB ANDW ANDL TESTB TESTW TESTL XORB XORW XORL
-%token PUSHL MOV
+%token PUSHL MOVB MOVW MOVL
 %token JMP JL JNL JLE JNLE JE JNE JO JNO JS JNS JZ JNZ JG JNG JGE JNGE
 %token CALL RET LEAVE
 %token COMMA LPAREN RPAREN EOF
@@ -32,9 +32,15 @@ argument:
   | IDENT { Id($1) }
 
 instruction:
-  | ADD argument COMMA argument   { Add($2, $4) }
-  | SUB argument COMMA argument   { Sub($2, $4) }
-  | CMP argument COMMA argument   { Cmp($2, $4) }
+  | ADDB argument COMMA argument   { Addb($2, $4) }
+  | ADDW argument COMMA argument   { Addw($2, $4) }
+  | ADDL argument COMMA argument   { Addl($2, $4) }
+  | SUBB argument COMMA argument   { Subb($2, $4) }
+  | SUBW argument COMMA argument   { Subw($2, $4) }
+  | SUBL argument COMMA argument   { Subl($2, $4) }
+  | CMPB argument COMMA argument   { Cmpb($2, $4) }
+  | CMPW argument COMMA argument   { Cmpw($2, $4) }
+  | CMPL argument COMMA argument   { Cmpl($2, $4) }
   | CLTD                          { Cltd }
   | IDIVL argument                { Idivl($2) }
   | ANDB argument COMMA argument  { Andb($2, $4) }
@@ -47,8 +53,10 @@ instruction:
   | XORW argument COMMA argument  { Xorw($2, $4) }
   | XORL argument COMMA argument  { Xorl($2, $4) }
   | PUSHL argument                { Pushl($2) }
-  | MOV argument COMMA argument  { Mov($2, $4) }
-  | JMP argument          { Jmp($2) }
+  | MOVB argument COMMA argument   { Movb($2, $4) }
+  | MOVW argument COMMA argument   { Movw($2, $4) }
+  | MOVL argument COMMA argument   { Movl($2, $4) }
+  | JMP argument        { Jmp($2) }
   | JL argument        { Jl($2) }
   | JNL argument        { Jnl($2) }
   | JLE argument        { Jle($2) }
