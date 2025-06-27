@@ -6,7 +6,7 @@
 %token <string> STRING
 %token <string> LABEL 
 %token <string> REGISTER 
-%token <string> IMMEDIATE  (* c'était un int avant *)
+%token <int> IMMEDIATE
 %token <int> NUMBER 
 %token <string> IDENT
 %token <string> FUNCTION

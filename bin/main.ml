@@ -41,7 +41,7 @@ let get_register reg =
 
 let argumentf argument insts argoffset = 
   match argument with
-  |Imm(s) -> insts := [|100; 9995 + argoffset; (if s = "$_GLOBAL_OFFSET_TABLE_" then 0 else int_of_string (String.sub s 1 (String.length s - 1)))|]::!insts
+  |Imm(imm) -> insts := [|100; 9995 + argoffset; imm|]::!insts
   |Reg1(reg) -> insts := [|100; 9995 + argoffset; get_register reg|]::!insts
   |Reg2(reg) -> insts := [|101; 9995 + argoffset; get_register reg|]::!insts
   |Reg3(offset, reg) -> insts := [|101; 9995 + argoffset; get_register reg|]::[|102; 9995 + argoffset; offset|]::!insts
@@ -176,7 +176,7 @@ let json_of_int_arr_list_list xs =
   )
 
 let () =
-  let filename = "code.s" in
+  let filename = "test.s" in
   let channel = open_in filename in
   let lexbuf = Lexing.from_channel channel in
   let ast = Parser.program Lexer.token lexbuf in

@@ -3,7 +3,7 @@ type argument =
   | Reg2 of string
   | Reg3 of int * string 
   | Reg4 of int * string * string * int
-  | Imm of string
+  | Imm of int
   | Num of int
   | Str of string
   | Id of string 

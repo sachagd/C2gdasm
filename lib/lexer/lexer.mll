@@ -1,11 +1,10 @@
 {
-(* Header code *)
 open Parser
-
 exception Lexing_error of string
 }
 
 let not_separator = [^' ' '\t' '\n' ',' '(' ')']
+let digit = ['0'-'9']
 
 rule token = parse
   | [' ' '\t' '\r' '\n']+           { token lexbuf }
@@ -14,8 +13,7 @@ rule token = parse
   | not_separator+ ":" as f         { FUNCTION f } 
   | "%" not_separator+ as r         { REGISTER r }
   | "\"" ([^'"'])* "\"" as s        { STRING s }
-  (* | "$" digit+ as s { IMMEDIATE (int_of_string (String.sub s 1 (String.length s - 1))) } *)
-  | "$" not_separator+ as s         { IMMEDIATE s }
+  | "$" digit+ as s                 { IMMEDIATE (int_of_string (String.sub s 1 (String.length s - 1))) }
   | ['-']? ['0'-'9']+ as num        { NUMBER (int_of_string num) }
 
   | "addb"       { ADDB }
