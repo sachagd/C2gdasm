@@ -21,7 +21,7 @@ $.exportConfig({
                 Y: 135,
                 COUNT: i + 1,
                 TARGET: group(200 + i),
-                ITEM: 9983,
+                ITEM: 9982,
                 ACTIVATE_GROUP: true,
                 SPAWN_TRIGGERED: true,
                 MULTI_TRIGGER: true,

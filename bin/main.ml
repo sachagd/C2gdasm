@@ -44,8 +44,8 @@ let argumentf argument insts argoffset =
   |Imm(imm) -> insts := [|100; 9995 + argoffset; imm|]::!insts
   |Reg1(reg) -> insts := [|100; 9995 + argoffset; get_register reg|]::!insts
   |Reg2(reg) -> insts := [|101; 9995 + argoffset; get_register reg|]::!insts
-  |Reg3(offset, reg) -> insts := [|101; 9995 + argoffset; get_register reg|]::[|102; 9995 + argoffset; offset|]::!insts
-  |Reg4(offset, base, index, scale) -> insts := [|101; 9995 + argoffset; get_register index|]::[|104; 9995 + argoffset; scale|]::[|103; 9995 + argoffset; get_register base|]::[|102; 9995 + argoffset; offset|]::!insts
+  |Reg3(offset, reg) -> insts := [|101; 9995 + argoffset; get_register reg|]::[|102; 9995 + argoffset; offset / 4|]::!insts
+  |Reg4(offset, base, index, scale) -> insts := [|101; 9995 + argoffset; get_register index|]::[|104; 9995 + argoffset; scale / 4|]::[|103; 9995 + argoffset; get_register base|]::[|102; 9995 + argoffset; offset / 4|]::!insts
   | _ -> failwith "invalid argument"
 
 let inst_type arg = 
@@ -56,8 +56,8 @@ let inst_type arg =
 
 let twoarg_instruction src dst code insts base = 
     insts := [|base + inst_type src|]::!insts;
-    argumentf src insts 0;
     argumentf dst insts 2;
+    argumentf src insts 0;
     code := !insts::!code
 
 let get_label target label_references = 
@@ -70,10 +70,12 @@ let instructionf code label_references instruction =
   match instruction with 
   |Addb(src, dst) -> twoarg_instruction src dst code insts 1
   |Addw(src, dst) -> twoarg_instruction src dst code insts 3
+  |Addl(Imm(imm), Reg1("%esp")) -> code := [[|100; 9995; imm / 4|]; [|100; 9997; 9990|]; [|5|]]::!code 
   |Addl(src, dst) -> twoarg_instruction src dst code insts 5
-    
-  |Subb(src, dst) -> twoarg_instruction src dst code insts 7
+  
+  |Subb(src, dst) -> twoarg_instruction src dst code insts 7                                                                                                                                                                                                                                                      
   |Subw(src, dst) -> twoarg_instruction src dst code insts 9
+  |Subl(Imm(imm), Reg1("%esp")) -> code := [[|100; 9995; imm / 4|]; [|100; 9997; 9990|]; [|11|]]::!code
   |Subl(src, dst) -> twoarg_instruction src dst code insts 11
 
   |Cmpb(src, dst) -> twoarg_instruction src dst code insts 13
@@ -97,7 +99,7 @@ let instructionf code label_references instruction =
     argumentf op insts 0;
     code := !insts::!code;
 
-  |Cltd -> code := [[|38|]]::!code
+  |Cltd -> ()
 
   |Movb(src, dst) -> twoarg_instruction src dst code insts 39
   |Movw(src, dst) -> twoarg_instruction src dst code insts 41
