@@ -3,7 +3,7 @@ _build/
 
 code.c
 code.s
-test.txt
+comments.txt
 txt.txt
 instructions.txt
 instructions_infoenplus.txt
