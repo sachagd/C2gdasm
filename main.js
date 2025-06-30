@@ -17,7 +17,7 @@ $.exportConfig({
             let n = instructions[i].length - 1;
             $.add(object({
                 OBJ_ID: 1811,
-                X: 1635 + 30 * i,
+                X: 1845 + 30 * i,
                 Y: 135,
                 COUNT: i + 1,
                 TARGET: group(200 + i),
@@ -32,7 +32,7 @@ $.exportConfig({
                 if (inst[0] == 100){
                     $.add(object({
                         OBJ_ID: 1817,
-                        X: 1635 + 2 * j + 30 * i,
+                        X: 1845 + 2 * j + 30 * i,
                         Y: 105 - 30 * j,
                         COUNT: inst[2],
                         ITEM: inst[1],
@@ -45,7 +45,7 @@ $.exportConfig({
                 else if (inst[0] == 101){
                     $.add(object({
                         OBJ_ID: 3619,
-                        X: 1635 + 2 * j + 30 * i,
+                        X: 1845 + 2 * j + 30 * i,
                         Y: 105 - 30 * j,
                         ITEM_ID_1: inst[2],
                         TYPE_1: 1,
@@ -60,7 +60,7 @@ $.exportConfig({
                 else if (inst[0] == 102){
                     $.add(object({
                         OBJ_ID: 1817,
-                        X: 1635 + 2 * j + 30 * i,
+                        X: 1845 + 2 * j + 30 * i,
                         Y: 105 - 30 * j,
                         COUNT: inst[2],
                         ITEM: inst[1],
@@ -72,7 +72,7 @@ $.exportConfig({
                 else if (inst[0] == 103){
                     $.add(object({
                         OBJ_ID: 3619,
-                        X: 1635 + 2 * j + 30 * i,
+                        X: 1845 + 2 * j + 30 * i,
                         Y: 105 - 30 * j,
                         ITEM_ID_1: inst[2],
                         TYPE_1: 1,
@@ -88,7 +88,7 @@ $.exportConfig({
                 else if (inst[0] == 104){
                     $.add(object({
                         OBJ_ID: 1817,
-                        X: 1635 + 2 * j + 30 * i,
+                        X: 1845 + 2 * j + 30 * i,
                         Y: 105 - 30 * j,
                         MODIFIER: inst[2],
                         ITEM: inst[1],
@@ -101,7 +101,7 @@ $.exportConfig({
             }
             $.add(object({
                 OBJ_ID: 1268,
-                X: 1635 + 2 * n + 30 * i,
+                X: 1845 + 2 * n + 30 * i,
                 Y: 105 - 30 * n,
                 TARGET: group(instructions[i][n][0]),
                 SPAWN_TRIGGERED: true,
@@ -109,15 +109,15 @@ $.exportConfig({
                 GROUPS: [group(200 + i), group(236)],
             }))
         }
-        for (let i = 0; i < 20; i++){
-            for (let j = 0; j < 20; j++){
-                  $.add(object({
-                    OBJ_ID: 1615,
-                    X: 1605 + 90 * j,
-                    Y: 825 - 30 * i, 
-                    ITEM: 9600 + 20 * i + j,
-                }))
-            }
-        }
+        // for (let i = 0; i < 20; i++){
+        //     for (let j = 0; j < 20; j++){
+        //           $.add(object({
+        //             OBJ_ID: 1615,
+        //             X: 1605 + 90 * j,
+        //             Y: 825 - 30 * i, 
+        //             ITEM: 9600 + 20 * i + j,
+        //         }))
+        //     }
+        // }
     }
 });

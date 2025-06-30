@@ -1,30 +1,36 @@
 open Ast
 
+let rec finstructionf instructions =
+  match instructions with 
+  |[] -> 0
+  |Cltd::t -> finstructionf t
+  |_::t -> 1 + finstructionf t 
+
 let flabelf label_references program_counter label =
   match label with
   |Label(name, instructions) ->
     Hashtbl.add label_references (String.sub name 0 (String.length name - 1)) !program_counter;
-    program_counter := !program_counter + List.length instructions
+    program_counter := !program_counter + finstructionf instructions
 
-let rec ffunctionsf functions label_references program_counter =
+let rec ffunctionf functions label_references program_counter =
   match functions with 
   |[] -> ()
   |Function(name, labels)::t ->
     if name = "main:" then 
       begin
       List.iter (flabelf label_references program_counter) labels;
-      ffunctionsf t label_references program_counter;
+      ffunctionf t label_references program_counter;
       end
     else 
       begin
-      ffunctionsf t label_references program_counter;
+      ffunctionf t label_references program_counter;
       List.iter (flabelf label_references program_counter) labels;
       end
 
 let fprogramf (Program(functions)) = 
   let program_counter = ref 0 in 
   let label_references = Hashtbl.create 0 in
-  ffunctionsf functions label_references program_counter;
+  ffunctionf functions label_references program_counter;
   label_references 
 
 let get_register reg = 
@@ -45,13 +51,14 @@ let argumentf argument insts argoffset =
   |Reg1(reg) -> insts := [|100; 9995 + argoffset; get_register reg|]::!insts
   |Reg2(reg) -> insts := [|101; 9995 + argoffset; get_register reg|]::!insts
   |Reg3(offset, reg) -> insts := [|101; 9995 + argoffset; get_register reg|]::[|102; 9995 + argoffset; offset / 4|]::!insts
-  |Reg4(offset, base, index, scale) -> insts := [|101; 9995 + argoffset; get_register index|]::[|104; 9995 + argoffset; scale / 4|]::[|103; 9995 + argoffset; get_register base|]::[|102; 9995 + argoffset; offset / 4|]::!insts
-  | _ -> failwith "invalid argument"
+  |Reg4(base, index, scale) -> insts := [|101; 9995 + argoffset; get_register index|]::[|104; 9995 + argoffset; scale / 4|]::[|103; 9995 + argoffset; get_register base|]::!insts
+  |Reg5(offset, base, index, scale) -> insts := [|101; 9995 + argoffset; get_register index|]::[|104; 9995 + argoffset; scale / 4|]::[|103; 9995 + argoffset; get_register base|]::[|102; 9995 + argoffset; offset / 4|]::!insts
+    | _ -> failwith "invalid argument"
 
 let inst_type arg = 
   match arg with
   |Imm(_) -> 0
-  |Reg1(_) |Reg2(_) |Reg3(_, _) |Reg4(_, _, _, _) -> 1
+  |Reg1(_) |Reg2(_) |Reg3(_, _) |Reg4(_, _, _) |Reg5(_, _, _, _) -> 1
   | _ -> failwith "invalid argument"
 
 let twoarg_instruction src dst code insts base = 
@@ -65,7 +72,7 @@ let get_label target label_references =
   |Id(label) -> Hashtbl.find label_references label
   | _ -> failwith "invalid target"
 
-let instructionf code label_references instruction = 
+let sinstructionf code label_references is_main instruction = 
   let insts = ref [] in 
   match instruction with 
   |Addb(src, dst) -> twoarg_instruction src dst code insts 1
@@ -107,59 +114,53 @@ let instructionf code label_references instruction =
 
   |Jmp(target) -> code := [[|100; 9995; get_label target label_references|];[|45|]]::!code;
 
-  |Jl(target) -> code := [[|100; 9995; get_label target label_references|];[|46|]]::!code;
-  |Jnl(target) -> code := [[|100; 9995; get_label target label_references|];[|47|]]::!code;
+  |Je(target) |Jz(target) -> code := [[|100; 9995; get_label target label_references|];[|46|]]::!code;
+  |Jne(target) |Jnz(target) -> code := [[|100; 9995; get_label target label_references|];[|47|]]::!code;
 
-  |Jle(target) -> code := [[|100; 9995; get_label target label_references|];[|48|]]::!code;
-  |Jnle(target) -> code := [[|100; 9995; get_label target label_references|];[|49|]]::!code;
+  |Js(target) -> code := [[|100; 9995; get_label target label_references|];[|48|]]::!code;
+  |Jns(target) -> code := [[|100; 9995; get_label target label_references|];[|49|]]::!code;
 
-  |Je(target) -> code := [[|100; 9995; get_label target label_references|];[|50|]]::!code;
-  |Jne(target) -> code := [[|100; 9995; get_label target label_references|];[|51|]]::!code;
+  |Jo(target) -> code := [[|100; 9995; get_label target label_references|];[|50|]]::!code;
+  |Jno(target) -> code := [[|100; 9995; get_label target label_references|];[|51|]]::!code;
 
-  |Jo(target) -> code := [[|100; 9995; get_label target label_references|];[|52|]]::!code;
-  |Jno(target) -> code := [[|100; 9995; get_label target label_references|];[|53|]]::!code;
+  |Jc(target) -> code := [[|100; 9995; get_label target label_references|];[|52|]]::!code;
+  |Jnc(target) -> code := [[|100; 9995; get_label target label_references|];[|53|]]::!code;
 
-  |Js(target) -> code := [[|100; 9995; get_label target label_references|];[|54|]]::!code;
-  |Jns(target) -> code := [[|100; 9995; get_label target label_references|];[|55|]]::!code;
+  |Jge(target) |Jnl(target) -> code := [[|100; 9995; get_label target label_references|];[|54|]]::!code;
+  |Jnge(target) |Jl(target) -> code := [[|100; 9995; get_label target label_references|];[|55|]]::!code;
 
-  |Jz(target) -> code := [[|100; 9995; get_label target label_references|];[|56|]]::!code;
-  |Jnz(target) -> code := [[|100; 9995; get_label target label_references|];[|57|]]::!code;
-
-  |Jg(target) -> code := [[|100; 9995; get_label target label_references|];[|58|]]::!code;
-  |Jng(target) -> code := [[|100; 9995; get_label target label_references|];[|59|]]::!code;
-
-  |Jge(target) -> code := [[|100; 9995; get_label target label_references|];[|60|]]::!code;
-  |Jnge(target) -> code := [[|100; 9995; get_label target label_references|];[|61|]]::!code;
+  |Jle(target) |Jng(target) -> code := [[|100; 9995; get_label target label_references|];[|56|]]::!code;
+  |Jnle(target) |Jg(target) -> code := [[|100; 9995; get_label target label_references|];[|57|]]::!code;
 
   |Call(target) -> code := [[|100; 9995; get_label target label_references|];[|62|]]::!code;
 
-  |Ret -> code := [[|63|]]::!code;
+  |Ret -> if is_main then code := [[|64|]]::!code else code := [[|63|]]::!code;
 
   | _ -> failwith "invalid instruction"
 
-let slabelf label_references code label =
+let slabelf label_references code is_main label =
   match label with
   |Label(_, instructions) ->
-    List.iter (instructionf code label_references) instructions
+    List.iter (sinstructionf code label_references is_main) instructions
 
-let rec sfunctionsf functions label_references code =
+let rec sfunctionf functions label_references code =
   match functions with 
   |[] -> ()
   |Function(name, labels)::t ->
     if name = "main:" then 
       begin
-      List.iter (slabelf label_references code) labels;
-      sfunctionsf t label_references code;
+      List.iter (slabelf label_references code true) labels;
+      sfunctionf t label_references code;
       end
     else 
       begin
-      sfunctionsf t label_references code;
-      List.iter (slabelf label_references code) labels;
+      sfunctionf t label_references code;
+      List.iter (slabelf label_references code false) labels;
       end
 
 let sprogramf (Program(functions)) label_references = 
   let code = ref [] in
-  sfunctionsf functions label_references code;
+  sfunctionf functions label_references code;
   !code
 
 let json_of_int_arr_list_list xs =

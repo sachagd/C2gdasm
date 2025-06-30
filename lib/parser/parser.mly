@@ -13,7 +13,7 @@
 %token ADDB ADDW ADDL SUBB SUBW SUBL CMPB CMPW CMPL CLTD IDIVL
 %token ANDB ANDW ANDL TESTB TESTW TESTL XORB XORW XORL
 %token PUSHL MOVB MOVW MOVL
-%token JMP JL JNL JLE JNLE JE JNE JO JNO JS JNS JZ JNZ JG JNG JGE JNGE
+%token JMP JE JZ JNE JNZ JS JNS JO JNO JC JNC JGE JNL JNGE JL JLE JNG JNLE JG
 %token CALL RET LEAVE
 %token COMMA LPAREN RPAREN EOF
 
@@ -27,7 +27,8 @@ argument:
   | REGISTER { Reg1($1) }
   | LPAREN REGISTER RPAREN { Reg2($2) }
   | NUMBER LPAREN REGISTER RPAREN { Reg3($1, $3) }
-  | NUMBER LPAREN REGISTER COMMA REGISTER COMMA NUMBER RPAREN { Reg4($1, $3, $5, $7) }
+  | LPAREN REGISTER COMMA REGISTER COMMA NUMBER RPAREN { Reg4($2, $4, $6) }
+  | NUMBER LPAREN REGISTER COMMA REGISTER COMMA NUMBER RPAREN { Reg5($1, $3, $5, $7) }
   | IMMEDIATE { Imm($1) }
   | IDENT { Id($1) }
 
@@ -57,22 +58,24 @@ instruction:
   | MOVW argument COMMA argument   { Movw($2, $4) }
   | MOVL argument COMMA argument   { Movl($2, $4) }
   | JMP argument        { Jmp($2) }
-  | JL argument        { Jl($2) }
-  | JNL argument        { Jnl($2) }
-  | JLE argument        { Jle($2) }
-  | JNLE argument        { Jnle($2) }
   | JE argument        { Je($2) }
+  | JZ argument        { Jz($2) }
   | JNE argument        { Jne($2) }
-  | JO argument        { Jo($2) }
-  | JNO argument        { Jno($2) }
+  | JNZ argument        { Jnz($2) }
   | JS argument        { Js($2) }
   | JNS argument        { Jns($2) }
-  | JZ argument        { Jz($2) }
-  | JNZ argument        { Jnz($2) }
-  | JG argument        { Jg($2) }
-  | JNG argument        { Jng($2) }
+  | JO argument        { Jo($2) }
+  | JNO argument        { Jno($2) }
+  | JC argument        { Jc($2) }
+  | JNC argument        { Jnc($2) }
   | JGE argument        { Jge($2) }
+  | JNL argument        { Jnl($2) }
   | JNGE argument        { Jnge($2) }
+  | JL argument        { Jl($2) }
+  | JLE argument        { Jle($2) }
+  | JNG argument        { Jng($2) }
+  | JNLE argument        { Jnle($2) }
+  | JG argument        { Jg($2) }
   | CALL argument                 { Call($2) }
   | RET                           { Ret }
   | LEAVE                         { Leave }

@@ -41,22 +41,24 @@ rule token = parse
   | "movw"       { MOVW }
   | "movl"       { MOVL }
   | "jmp"        { JMP }
-  | "jl"         { JL }
-  | "jnl"        { JNL }
-  | "jle"        { JLE }
-  | "jnle"       { JNLE }
   | "je"         { JE }
+  | "jz"         { JZ }
   | "jne"        { JNE }
-  | "jo"         { JO }
-  | "jno"        { JNO }
+  | "jnz"        { JNZ }
   | "js"         { JS }
   | "jns"        { JNS }
-  | "jz"         { JZ }
-  | "jnz"        { JNZ }
-  | "jg"         { JG }
-  | "jng"        { JNG }
+  | "jo"         { JO }
+  | "jno"        { JNO }
+  | "jc"         { JC }
+  | "jnc"        { JNC }
   | "jge"        { JGE }
+  | "jnl"        { JNL }
   | "jnge"       { JNGE }
+  | "jl"         { JL }
+  | "jle"        { JLE }
+  | "jng"        { JNG }
+  | "jnle"       { JNLE }
+  | "jg"         { JG }
   | "call"       { CALL }
   | "ret"        { RET }
   | "leave"      { LEAVE }
