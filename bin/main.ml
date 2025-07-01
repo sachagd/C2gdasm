@@ -45,15 +45,15 @@ let get_register reg =
   |"%esp" -> 9990
   | _ -> failwith "unknown register"
 
-let argumentf argument insts argoffset = 
+let argumentf argument insts argoffset divf = 
   match argument with
   |Imm(imm) -> insts := [|100; 9995 + argoffset; imm|]::!insts
   |Reg1(reg) -> insts := [|100; 9995 + argoffset; get_register reg|]::!insts
   |Reg2(reg) -> insts := [|101; 9995 + argoffset; get_register reg|]::!insts
-  |Reg3(offset, reg) -> insts := [|101; 9995 + argoffset; get_register reg|]::[|102; 9995 + argoffset; offset / 4|]::!insts
-  |Reg4(base, index, scale) -> insts := [|101; 9995 + argoffset; get_register index|]::[|104; 9995 + argoffset; scale / 4|]::[|103; 9995 + argoffset; get_register base|]::!insts
-  |Reg5(offset, base, index, scale) -> insts := [|101; 9995 + argoffset; get_register index|]::[|104; 9995 + argoffset; scale / 4|]::[|103; 9995 + argoffset; get_register base|]::[|102; 9995 + argoffset; offset / 4|]::!insts
-    | _ -> failwith "invalid argument"
+  |Reg3(offset, reg) -> insts := [|101; 9995 + argoffset; get_register reg|]::[|102; 9995 + argoffset; offset / divf|]::!insts
+  |Reg4(base, index, scale) -> insts := [|101; 9995 + argoffset; get_register index|]::[|104; 9995 + argoffset; scale / divf|]::[|103; 9995 + argoffset; get_register base|]::!insts
+  |Reg5(offset, base, index, scale) -> insts := [|101; 9995 + argoffset; get_register index|]::[|104; 9995 + argoffset; scale / divf|]::[|103; 9995 + argoffset; get_register base|]::[|102; 9995 + argoffset; offset / divf|]::!insts
+  | _ -> failwith "invalid argument"
 
 let inst_type arg = 
   match arg with
@@ -61,10 +61,10 @@ let inst_type arg =
   |Reg1(_) |Reg2(_) |Reg3(_, _) |Reg4(_, _, _) |Reg5(_, _, _, _) -> 1
   | _ -> failwith "invalid argument"
 
-let twoarg_instruction src dst code insts base = 
+let twoarg_instruction src dst code insts base divf = 
     insts := [|base + inst_type src|]::!insts;
-    argumentf dst insts 2;
-    argumentf src insts 0;
+    argumentf dst insts 2 divf;
+    argumentf src insts 0 divf;
     code := !insts::!code
 
 let get_label target label_references = 
@@ -75,42 +75,46 @@ let get_label target label_references =
 let sinstructionf code label_references is_main instruction = 
   let insts = ref [] in 
   match instruction with 
-  |Addb(src, dst) -> twoarg_instruction src dst code insts 1
-  |Addw(src, dst) -> twoarg_instruction src dst code insts 3
+  |Addb(src, dst) -> twoarg_instruction src dst code insts 1 4
+  |Addw(src, dst) -> twoarg_instruction src dst code insts 3 4
   |Addl(Imm(imm), Reg1("%esp")) -> code := [[|100; 9995; imm / 4|]; [|100; 9997; 9990|]; [|5|]]::!code 
-  |Addl(src, dst) -> twoarg_instruction src dst code insts 5
+  |Addl(src, dst) -> twoarg_instruction src dst code insts 5 4
   
-  |Subb(src, dst) -> twoarg_instruction src dst code insts 7                                                                                                                                                                                                                                                      
-  |Subw(src, dst) -> twoarg_instruction src dst code insts 9
+  |Subb(src, dst) -> twoarg_instruction src dst code insts 7 4                                                                                                                                                                                                                                                   
+  |Subw(src, dst) -> twoarg_instruction src dst code insts 9 4
   |Subl(Imm(imm), Reg1("%esp")) -> code := [[|100; 9995; imm / 4|]; [|100; 9997; 9990|]; [|11|]]::!code
-  |Subl(src, dst) -> twoarg_instruction src dst code insts 11
+  |Subl(src, dst) -> twoarg_instruction src dst code insts 11 4
 
-  |Cmpb(src, dst) -> twoarg_instruction src dst code insts 13
-  |Cmpw(src, dst) -> twoarg_instruction src dst code insts 15
-  |Cmpl(src, dst) -> twoarg_instruction src dst code insts 17
+  |Cmpb(src, dst) -> twoarg_instruction src dst code insts 13 4
+  |Cmpw(src, dst) -> twoarg_instruction src dst code insts 15 4
+  |Cmpl(src, dst) -> twoarg_instruction src dst code insts 17 4
 
-  |Andb(src, dst) -> twoarg_instruction src dst code insts 19
-  |Andw(src, dst) -> twoarg_instruction src dst code insts 21
-  |Andl(src, dst) -> twoarg_instruction src dst code insts 23
+  |Andb(src, dst) -> twoarg_instruction src dst code insts 19 4
+  |Andw(src, dst) -> twoarg_instruction src dst code insts 21 4
+  |Andl(src, dst) -> twoarg_instruction src dst code insts 23 4
 
-  |Testb(op1, op2) -> twoarg_instruction op1 op2 code insts 25
-  |Testw(op1, op2) -> twoarg_instruction op1 op2 code insts 27
-  |Testl(op1, op2) -> twoarg_instruction op1 op2 code insts 29
+  |Testb(op1, op2) -> twoarg_instruction op1 op2 code insts 25 4
+  |Testw(op1, op2) -> twoarg_instruction op1 op2 code insts 27 4
+  |Testl(op1, op2) -> twoarg_instruction op1 op2 code insts 29 4
 
-  |Xorb(src, dst) -> twoarg_instruction src dst code insts 31
-  |Xorw(src, dst) -> twoarg_instruction src dst code insts 33
-  |Xorl(src, dst) -> twoarg_instruction src dst code insts 35
+  |Xorb(src, dst) -> twoarg_instruction src dst code insts 31 4
+  |Xorw(src, dst) -> twoarg_instruction src dst code insts 33 4
+  |Xorl(src, dst) -> twoarg_instruction src dst code insts 35 4
     
+  |Imull(src, dst) -> twoarg_instruction src dst code insts 36 4
+
   |Idivl(op) ->
-    insts := [|37|]::!insts;
-    argumentf op insts 0;
+    insts := [|38|]::!insts;
+    argumentf op insts 0 4;
     code := !insts::!code;
 
   |Cltd -> ()
 
-  |Movb(src, dst) -> twoarg_instruction src dst code insts 39
-  |Movw(src, dst) -> twoarg_instruction src dst code insts 41
-  |Movl(src, dst) -> twoarg_instruction src dst code insts 43
+  |Movb(src, dst) -> twoarg_instruction src dst code insts 39 4
+  |Movw(src, dst) -> twoarg_instruction src dst code insts 41 4
+  |Movl(src, dst) -> twoarg_instruction src dst code insts 43 4
+
+  |Leal(src, dst) -> twoarg_instruction src dst code insts 64 1
 
   |Jmp(target) -> code := [[|100; 9995; get_label target label_references|];[|45|]]::!code;
 

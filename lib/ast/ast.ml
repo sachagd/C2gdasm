@@ -20,6 +20,7 @@ type instruction =
   | Cmpw of argument * argument
   | Cmpl of argument * argument
   | Cltd
+  | Imull of argument * argument
   | Idivl of argument
   | Andb of argument * argument
   | Andw of argument * argument
@@ -34,6 +35,7 @@ type instruction =
   | Movb of argument * argument
   | Movw of argument * argument
   | Movl of argument * argument
+  | Leal of argument * argument
   | Jmp of argument
   | Je of argument
   | Jz of argument

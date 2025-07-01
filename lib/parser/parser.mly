@@ -10,9 +10,9 @@
 %token <int> NUMBER 
 %token <string> IDENT
 %token <string> FUNCTION
-%token ADDB ADDW ADDL SUBB SUBW SUBL CMPB CMPW CMPL CLTD IDIVL
+%token ADDB ADDW ADDL SUBB SUBW SUBL CMPB CMPW CMPL CLTD IMULL IDIVL
 %token ANDB ANDW ANDL TESTB TESTW TESTL XORB XORW XORL
-%token PUSHL MOVB MOVW MOVL
+%token PUSHL MOVB MOVW MOVL LEAL
 %token JMP JE JZ JNE JNZ JS JNS JO JNO JC JNC JGE JNL JNGE JL JLE JNG JNLE JG
 %token CALL RET LEAVE
 %token COMMA LPAREN RPAREN EOF
@@ -43,6 +43,7 @@ instruction:
   | CMPW argument COMMA argument   { Cmpw($2, $4) }
   | CMPL argument COMMA argument   { Cmpl($2, $4) }
   | CLTD                          { Cltd }
+  | IMULL argument COMMA argument  { Imull($2, $4) }
   | IDIVL argument                { Idivl($2) }
   | ANDB argument COMMA argument  { Andb($2, $4) }
   | ANDW argument COMMA argument  { Andw($2, $4) }
@@ -57,6 +58,7 @@ instruction:
   | MOVB argument COMMA argument   { Movb($2, $4) }
   | MOVW argument COMMA argument   { Movw($2, $4) }
   | MOVL argument COMMA argument   { Movl($2, $4) }
+  | LEAL argument COMMA argument  { Leal($2, $4) }
   | JMP argument        { Jmp($2) }
   | JE argument        { Je($2) }
   | JZ argument        { Jz($2) }

@@ -8,13 +8,13 @@ $.exportConfig({
 
     const sinstructions = fs.readFileSync("code.json", "utf8");
     const instructions = JSON.parse(sinstructions);
-
-    if (instructions.length >= 9900) {
+    const n = instructions.length;
+    if (n >= 9900) {
         // error code trop long
     }
     else{
-        for (let i = 0; i < instructions.length; i++){
-            let n = instructions[i].length - 1;
+        for (let i = 0; i < n; i++){
+            let p = instructions[i].length - 1;
             $.add(object({
                 OBJ_ID: 1811,
                 X: 1845 + 30 * i,
@@ -27,7 +27,7 @@ $.exportConfig({
                 MULTI_TRIGGER: true,
                 GROUPS: group(112),
             }))
-            for (let j = 0; j < n; j++){
+            for (let j = 0; j < p; j++){
                 let inst = instructions[i][j];
                 if (inst[0] == 100){
                     $.add(object({
@@ -39,7 +39,7 @@ $.exportConfig({
                         SPAWN_TRIGGERED: true,
                         MULTI_TRIGGER: true,
                         OVERRIDE_COUNT: true,
-                        GROUPS: [group(200 + i), group(236)],
+                        GROUPS: [group(200 + i), group(200 + n)],
                     }))
                 }
                 else if (inst[0] == 101){
@@ -54,7 +54,7 @@ $.exportConfig({
                         MOD: 1,
                         SPAWN_TRIGGERED: true,
                         MULTI_TRIGGER: true,
-                        GROUPS: [group(200 + i), group(236)],
+                        GROUPS: [group(200 + i), group(200 + n)],
                     }))
                 }
                 else if (inst[0] == 102){
@@ -66,7 +66,7 @@ $.exportConfig({
                         ITEM: inst[1],
                         SPAWN_TRIGGERED: true,
                         MULTI_TRIGGER: true,
-                        GROUPS: [group(200 + i), group(236)],
+                        GROUPS: [group(200 + i), group(200 + n)],
                     }))
                 }
                 else if (inst[0] == 103){
@@ -82,7 +82,7 @@ $.exportConfig({
                         MOD: 1,
                         SPAWN_TRIGGERED: true,
                         MULTI_TRIGGER: true,
-                        GROUPS: [group(200 + i), group(236)],
+                        GROUPS: [group(200 + i), group(200 + n)],
                     }))
                 }
                 else if (inst[0] == 104){
@@ -95,20 +95,39 @@ $.exportConfig({
                         MULT_DIV: 1,
                         SPAWN_TRIGGERED: true,
                         MULTI_TRIGGER: true,
-                        GROUPS: [group(200 + i), group(236)],
+                        GROUPS: [group(200 + i), group(200 + n)],
                     }))
                 }
             }
             $.add(object({
                 OBJ_ID: 1268,
-                X: 1845 + 2 * n + 30 * i,
-                Y: 105 - 30 * n,
-                TARGET: group(instructions[i][n][0]),
+                X: 1845 + 2 * p + 30 * i,
+                Y: 105 - 30 * p,
+                TARGET: group(instructions[i][p][0]),
                 SPAWN_TRIGGERED: true,
                 MULTI_TRIGGER: true,
-                GROUPS: [group(200 + i), group(236)],
+                GROUPS: [group(200 + i), group(200 + n)],
+            }))
+            $.add(object({
+                OBJ_ID: 1049,
+                X: 1845 + 2 * (p + 1) + 30 * i,
+                Y: 105 - 30 * (p + 1),
+                TARGET: group(200 + n),
+                SPAWN_TRIGGERED: true,
+                MULTI_TRIGGER: true,
+                GROUPS: [group(200 + i)],
             }))
         }
+        $.add(object({
+            OBJ_ID: 1049,
+            X: 1845 + 2 * (p + 1) + 30 * i,
+            Y: 105 - 30 * (p + 1),
+            TARGET: group(200 + n),
+            ACTIVATE_GROUP: true,
+            SPAWN_TRIGGERED: true,
+            MULTI_TRIGGER: true,
+            GROUPS: [group(200 + i)],
+        }))
         // for (let i = 0; i < 20; i++){
         //     for (let j = 0; j < 20; j++){
         //           $.add(object({

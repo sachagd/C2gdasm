@@ -26,6 +26,7 @@ rule token = parse
   | "cmpw"       { CMPW }
   | "cmpl"       { CMPL }
   | "cltd"       { CLTD }
+  | "imull"      { IMULL }
   | "idivl"      { IDIVL }
   | "andb"       { ANDB }
   | "andw"       { ANDW }
@@ -40,6 +41,7 @@ rule token = parse
   | "movb"       { MOVB }
   | "movw"       { MOVW }
   | "movl"       { MOVL }
+  | "leal"       { LEAL }
   | "jmp"        { JMP }
   | "je"         { JE }
   | "jz"         { JZ }
