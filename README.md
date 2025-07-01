@@ -4,9 +4,9 @@ If you want to see what this project is able to do, here's a [video](https://x.c
 
 As of now, the instruction set is : 
 
-    - add, sub, cmp, idiv 
+    - add, sub, cmp, imul, idiv 
     - jmp, je/jz, jne/jnz, js, jns, jo, jno, jc, jnc, jge/jnl, jnge/jl, jle/jng, jnle/jg
-    - mov
+    - mov, lea
     - cltd
     - call, ret
     - halt
