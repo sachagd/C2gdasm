@@ -1,0 +1,89 @@
+choisir rbp (register base pointer) à la fin du tas, probablement quelque chose vers 9500
+la gestion de la mémoire du tas se fait du haut vers le bas. 
+
+exécution de code asm -> gros bloc de mémoire tas alloué
+chaque appel de fonction dans ce code, une sous partie de ce gros espace (stack frame) est alloué pour cette fontion du haut vers le bas de la mémoire totale
+appel imbriqué, les stack frame sont empilés du haut vers le bas, en bas l'appel le plus profond
+
+
++---------------------+  <-- Higher addresses
+| Return Address      |  <-- Pushed automatically by call
++---------------------+
+| Caller’s %rbp       |  <-- Pushed in function prologue (push %rbp)
++---------------------+  <-- New %rbp is set here
+| Local variables ... |
++---------------------+  <-- Lower addresses
+
+return address permet de sortir de la fonction et retourner au bon endroit pour exécuter la suite du code asm
+base caller permet de sortir de la fonction et retourner au bon endroit sur la tas
+
+quand t'appelle une fonction, il se passe deux choses : tu sauvegardes le current rbp dans le stack frame de la nouvelle fonction appelé (décrit juste au dessus)
+comme ça tout en haut du stack frame, t'as les infos pour sortir de la fonction
+et tu set le rbp sur le current stack pointer (rsp) celui qui bouge, comme ça le nouveau stack frame devient le current
+
+les objets counter (ceux utilisés pour la RAM) sont des int32 allant de -2 147 483 648 à 2 147 483 647
+
+les registres (apparement tous) ont deux variantes de nom 32 bits/64 bits, modifier le registre via son nom 32 bit reset à 0 les bits supérieurs
+de la même manière il y a des variantes d'instruction (apparement ici encore la plupart)
+b: indicates 8‑bit operations (byte).
+w: indicates 16‑bit operations (word).
+l: indicates 32‑bit operations (long).
+q: indicates 64‑bit operations (quad).
+
+For the original registers (like RAX, RBX, RCX, RDX), there is a consistent naming convention:
+    The 64‑bit register: e.g., RAX
+    The lower 32‑bit part: prefix with "E", e.g., EAX
+    The lower 16‑bit part: drop the prefix, e.g., AX
+    The lower 8‑bit part: for these registers, the low byte is AL and the high byte of the 16‑bit register is AH
+
+For registers R8 through R15, the naming is slightly different:
+    The 64‑bit register: e.g., R8
+    The lower 32‑bit part: add a "D", e.g., R8D
+    The lower 16‑bit part: add a "W", e.g., R8W
+    The lower 8‑bit part: add a "B", e.g., R8B
+
+forcer à compiler en 32 bits
+apparement flag -m32 le permet ça semble marcher
+
+tout faire en 32 bits
+
+certaines instructions peuvent s'exécuter sur le tas mais d'autres non (t[i]) -> faut multiplier i par la taille des éléments de t puis ajouter à l'adresse de t etc..
+un même code asm peut faire les deux sur une même variable
+
+spilled -> mettre sur le tas
+
+peut être preprocess le code asm pour remplacer tout les -140(%rbp) par des constantes puis à la place de déplacer chaque instructions avec les inputs/outputs,
+copier/coller l'instruction directement déjà prête à exécuter
+
+Bonus : 
+main a lui même un caller (souvent appelé crt0)
+
+gcc -S test.c -m32 -fdirectives-only -fno-ident -fno-pic -fno-pie -fomit-frame-pointer -fcf-protection=none -fno-stack-protector -fno-unwind-tables -fno-asynchronous-unwind-tables -o test.s
+
+
+
+
+
+27 : 11011
+21 : 10101
+
+r  : 10001 
+
+27 = 2 * 13 + 1
+13 = 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

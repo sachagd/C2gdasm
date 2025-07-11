@@ -1,0 +1,55 @@
+https://geode-sdk.org/me
+
+trucs qui pourrait être fait : 
+    - jle qui fait pas vraiment un ou, si les deux conditions sont vérifiées alors le pc est changé deux fois
+    - pour enlever des appels de groupes sur les jumps, copier coller les triggers directement dans le code 
+    - quand la src est un immediate, je voulais faire un truc mais je sais plus (lmao)
+
+
+mettre 9980 dans esp au tout début
+
+9981 : temp mem -> vérfier qu'enlever 9982 ne pose pas de problème (avant c'était également dans temp mem)
+9982 : program counter
+9983-9990 : %eax, %ebx, %ecx, %edx, %esi, %edi, %ebp, %esp
+9991 : zero flag
+9992 : sign flag
+9993 : overflow flag
+9994 : carry flag
+9995 : arg1
+9996 : arg1 value
+9997 : arg2
+9998 : arg2 value
+9999 : result
+
+pc specs : 
+
+cpu : 32 bits, 8 registers, 4 flags, 200Hz clock speed (could in theory be increased up to 10000hz)
+RAM : 40KB
+
+groups : 
+    - 0 to 100 : opcodes
+    - 100 to 200 : extra groups for instructions execution
+    - 200 to 300 : flags update (surement pas besoin d'autant)
+    - 300 + whatever flags update take to the same plus some tiny constant : main loop
+    - 3?? to 10000 : code 
+
+
+carry flag : 
+    add : (src < 0 && dst < 0) || (src < 0 && dst >= 0 && src + dst >= 0) || (src >= 0 && dst < 0 && src + dst >= 0)
+    on notera que c'est équivalent à (src < 0 && dst < 0) || ((src < 0 && dst >= 0 && || src >= 0 && dst < 0) && src + dst >= 0) 
+    qui est lui même équivalent à (src < 0 && dst < 0) || (src * dst < 0 && result >= 0)
+    penser à l'inverser celui-là aussi
+
+
+100 : pickup trigger, met une constante -> [|100, iid d'écriture, constante|]
+101 : item edit trigger, met la valeur stockée dans un iid -> [|101, iid d'écriture, iid de lecture|]
+102 : pickup trigger, ajoute une constante -> [|102, iid d'écriture, constante|]
+103 : item edit trigger, ajoute la valeur stockée dans un iid -> [|103, iid d'écriture, iid de lecture|]
+104 : pickup trigger, multiplie par une constante -> [|104, iid d'écriture, constante|]
+
+jge = jnl 
+jnge = jl
+
+jg = jnle
+jng = jle
+

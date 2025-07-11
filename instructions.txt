@@ -1,0 +1,115 @@
+FLAGS register, chaque bit est utilisé pour des résultats d'opération arithmétiques mais pas que.
+Est ce que j'utilise un seul compteur pour tous les flags ou un compteur par flag ? 
+
+Ceux qui peuvent être utilisé par un code asm généré par compilation de code c sont (pas certain qu'il y ait que ceux là mais normalement si quand même): 
+
+Zero Flag (ZF): Indicates whether the result of an operation is zero.
+Sign Flag (SF): Reflects whether the result is negative.
+Carry Flag (CF): Indicates an overflow from the most significant bit in unsigned arithmetic.
+Overflow Flag (OF): Signals an overflow in signed arithmetic.
+Parity Flag (PF) (occasionally) -> utilisé apparement par les instructions jp jpe jpo setp setnp, ça à pas l'air fréquent mais peut être quand même l'implémenter
+Auxiliary Flag (AF) (rarely, and mostly in specific cases like BCD arithmetic)
+
+
+test <operand1>, <operand2>
+    Both operands can be registers, memory locations, or an immediate value and a register/memory. However, at least one operand must be non-immediate
+    Operation: Performs a bitwise AND of the two operands, discards the result, and updates flags.
+    Zero flag: 1 if result is 0, 0 otherwise.
+    Sign flag: 1 if most significant bit of result is 1, 0 otherwise.
+    Parity flag: 1 if the low-order byte of result has an even number of 1 bits, 0 otherwise.
+    Overflow flag: 0.
+    Carry flag: 0.
+
+and <source>, <destination>
+    Operation: Performs a bitwise AND of the source operand and the destination operand, then stores the result in the destination operand, updating flags.
+    Destination operand: The second operand; it is overwritten with the result of the AND operation.
+    Zero flag: 1 if result is 0, 0 otherwise.
+    Sign flag: 1 if most significant bit of result is 1, 0 otherwise.
+    Parity flag: 1 if the low-order byte of result has an even number of 1 bits, 0 otherwise.
+    Overflow flag: 0.
+    Carry flag: 0.
+
+xor <source>, <destination>
+    Operation: Performs a bitwise XOR of the source operand with the destination operand, then stores the result in the destination operand, updating flags.
+    Destination operand: The second operand; it is overwritten with the result.
+    Zero flag: 1 if result is 0, 0 otherwise.
+    Sign flag: 1 if most significant bit of result is 1, 0 otherwise.
+    Parity flag: 1 if the low-order byte of result has an even number of 1 bits, 0 otherwise.
+    Overflow flag: 0.
+    Carry flag: 0.
+
+add <source>, <destination>
+    Operation: Adds the source operand to the destination operand and stores the result in the destination operand, updating flags.
+    Destination operand: The second operand; it is overwritten with the result.
+    Zero flag: 1 if result is 0, 0 otherwise.
+    Sign flag: 1 if most significant bit of result is 1, 0 otherwise.
+    Parity flag: 1 if the low-order byte of result has an even number of 1 bits, 0 otherwise.
+    Overflow flag: 1 if a signed overflow occurs, 0 otherwise.
+    Carry flag: 1 if an unsigned overflow occurs, 0 otherwise.
+
+sub <source>, <destination>
+    Operation: Subtracts the source operand from the destination operand and stores the result in the destination operand, updating flags.
+    Destination operand: The second operand; it is overwritten with the result.
+    Zero flag: 1 if result is 0, 0 otherwise.
+    Sign flag: 1 if most significant bit of result is 1, 0 otherwise.
+    Parity flag: 1 if the low-order byte of result has an even number of 1 bits, 0 otherwise.
+    Overflow flag: 1 if a signed overflow occurs, 0 otherwise.
+    Carry flag: 1 if an unsigned borrow occurs, 0 otherwise.
+
+cmp <source>, <destination>
+    Operation: Subtracts the source operand from the destination operand without storing the result; updates flags based on the subtraction.
+    Destination operand: The second operand; used as the minuend in the subtraction.
+    Zero flag: 1 if the result is 0 (operands are equal), 0 otherwise.
+    Sign flag: 1 if most significant bit of result is 1, 0 otherwise.
+    Parity flag: 1 if the low-order byte of the result has an even number of 1 bits, 0 otherwise.
+    Overflow flag: 1 if a signed overflow occurs, 0 otherwise.
+    Carry flag: 1 if an unsigned borrow occurs (destination is less than source), 0 otherwise.
+
+idiv <operand>
+    Operation: Divides the signed integer in the combined accumulator (rdx:rax for 64-bit or edx:eax for 32-bit) by the operand.
+    The quotient is stored in the accumulator (rax/eax) and the remainder in rdx/edx. 
+    If the divisor is 0 or the quotient is too large to fit in the accumulator, a divide error exception is raised. No flags are reliably updated.
+
+cltd
+    Operation: Sign extends the value in EAX into EDX:EAX (if EAX is negative, EDX becomes all 1's; otherwise, EDX becomes 0), preparing for a signed division; no flags are affected.
+
+mov <source>, <destination>
+    Operation: Copies the value from the source operand to the destination operand without performing any arithmetic or logical operation, and it does not update any flags.
+    Destination operand: The second operand; it is overwritten with the value of the source operand.
+
+push <operand>
+    Operation: Decrements the stack pointer by the size of the operand and stores the operand's value at the new top of the stack; no flags are modified.
+    Stack pointer: Updated to point to the new top of the stack.
+
+jmp <target>
+    Operation: Unconditionally transfers control to the address specified by the target operand, updating the instruction pointer; no flags are affected.
+    Target operand: Specifies the destination address, which can be a relative offset, an absolute address, or a register value.
+
+jl <target>
+    Operation: Jumps to the target address if the signed comparison indicates less-than; specifically, if the Sign flag is not equal to the Overflow flag. No flags are modified.
+    Target operand: Specifies the destination address, which can be a relative offset or an absolute address.
+
+jle <target>
+    Operation: Jumps to the target if the condition "less than or equal" is met, meaning it jumps if Zero flag is 1 or if Sign flag is not equal to Overflow flag; no flags are modified.
+    Target operand: Specifies the destination address, which can be a relative offset or an absolute address.
+
+je <target>
+    Operation: Jumps to the target if the Zero flag is 1 (i.e., if the previous operation produced a zero result, indicating equality); no flags are modified.
+    Target operand: Specifies the destination address, which can be a relative offset or an absolute address.
+
+jne <target>
+    Operation: Jumps to the target if Zero flag is 0 (i.e., the previous result was not equal); no flags are modified.
+    Target operand: Specifies the destination address, which can be a relative offset or an absolute address.
+
+leave
+    Operation: Restores the stack pointer by moving the base pointer value into the stack pointer and then pops the old base pointer from the stack; no flags are modified.
+
+call <target>
+    Operation: Pushes the address of the next instruction (return address) onto the stack and transfers control to the target address; updates the stack pointer.
+    Target operand: The destination address, which can be a relative offset, absolute address, or contained in a register; no flags are modified.
+
+ret
+    Operation: Pops the return address from the top of the stack and transfers control to that address; if an immediate value is provided (e.g., ret 8), it is added to the stack pointer after popping to remove additional arguments; no flags are modified.
+    Return address: Retrieved from the stack and used to resume execution at that location.
+
+Je pense que je peux regrouper certaines instructions ensemble mais je suis pas sûr. Il y a même moyen je peux juste ignorer certaines.

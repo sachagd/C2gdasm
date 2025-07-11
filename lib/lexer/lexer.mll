@@ -1,4 +1,5 @@
 {
+  
 open Parser
 exception Lexing_error of string
 }
@@ -25,9 +26,19 @@ rule token = parse
   | "cmpb"       { CMPB }
   | "cmpw"       { CMPW }
   | "cmpl"       { CMPL }
-  | "cltd"       { CLTD }
+  | "imulb"      { IMULB }
+  | "imulw"      { IMULW }
   | "imull"      { IMULL }
+  | "idivb"      { IDIVB }
+  | "idivw"      { IDIVW }
   | "idivl"      { IDIVL }
+  | "cltd"       { CLTD }
+  | "notb"       { NOTB }
+  | "notw"       { NOTW }
+  | "notl"       { NOTL }
+  | "orb"        { ORB }
+  | "orw"        { ORW }
+  | "orl"        { ORL }
   | "andb"       { ANDB }
   | "andw"       { ANDW }
   | "andl"       { ANDL }
@@ -37,10 +48,15 @@ rule token = parse
   | "xorb"       { XORB }
   | "xorw"       { XORW }
   | "xorl"       { XORL }
-  | "pushl"      { PUSHL }
   | "movb"       { MOVB }
   | "movw"       { MOVW }
   | "movl"       { MOVL }
+  | "pushb"      { PUSHB }
+  | "pushw"      { PUSHW }
+  | "pushl"      { PUSHL }
+  | "popb"       { POPB }
+  | "popw"       { POPW }
+  | "popl"       { POPL }
   | "leal"       { LEAL }
   | "jmp"        { JMP }
   | "je"         { JE }

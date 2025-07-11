@@ -3,11 +3,10 @@ _build/
 
 code.c
 code.s
-comments.txt
-txt.txt
-instructions.txt
-instructions_infoenplus.txt
 code.json
 
 test.c 
 test.s
+
+test2.c
+test2.s

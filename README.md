@@ -4,18 +4,17 @@ If you want to see what this project is able to do, here's a [video](https://x.c
 
 As of now, the instruction set is : 
 
-    - add, sub, cmp, imul, idiv 
+    - add, sub, cmp, imul, idiv, cltd 
+    - not, or, and, test, xor 
     - jmp, je/jz, jne/jnz, js, jns, jo, jno, jc, jnc, jge/jnl, jnge/jl, jle/jng, jnle/jg
-    - mov, lea
-    - cltd
-    - call, ret
-    - halt
+    - mov, lea, push, pop
+    - call, ret, halt
 
 What i'm doing right now : 
 
     creating distinct opcode based on the operation size (add -> addb, addw, addl)
     finding optimised way to do bitwise operation (if you know a way to do that i'm interested, dm me on discord)
-    adding a bunch of jump instruction
+    creating a heap
 
 ## A modest attempt at doing some sort of documentation/explanation : 
 

@@ -1,13 +1,13 @@
 type argument = 
   | Reg1 of string
   | Reg2 of string
-  | Reg3 of int * string 
+  | Reg3 of int * string
   | Reg4 of string * string * int
   | Reg5 of int * string * string * int
   | Imm of int
   | Num of int
   | Str of string
-  | Id of string 
+  | Id of string
 
 type instruction = 
   | Addb of argument * argument
@@ -19,9 +19,19 @@ type instruction =
   | Cmpb of argument * argument
   | Cmpw of argument * argument
   | Cmpl of argument * argument
-  | Cltd
+  | Imulb of argument * argument
+  | Imulw of argument * argument
   | Imull of argument * argument
+  | Idivb of argument
+  | Idivw of argument
   | Idivl of argument
+  | Cltd
+  | Notb of argument * argument
+  | Notw of argument * argument
+  | Notl of argument * argument
+  | Orb of argument * argument
+  | Orw of argument * argument
+  | Orl of argument * argument
   | Andb of argument * argument
   | Andw of argument * argument
   | Andl of argument * argument
@@ -31,10 +41,15 @@ type instruction =
   | Xorb of argument * argument
   | Xorw of argument * argument
   | Xorl of argument * argument
-  | Pushl of argument
   | Movb of argument * argument
   | Movw of argument * argument
   | Movl of argument * argument
+  | Pushb of argument
+  | Pushw of argument
+  | Pushl of argument
+  | Popb of argument
+  | Popw of argument
+  | Popl of argument
   | Leal of argument * argument
   | Jmp of argument
   | Je of argument

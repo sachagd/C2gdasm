@@ -101,7 +101,7 @@ let sinstructionf code label_references is_main instruction =
   |Xorw(src, dst) -> twoarg_instruction src dst code insts 33 4
   |Xorl(src, dst) -> twoarg_instruction src dst code insts 35 4
     
-  |Imull(src, dst) -> twoarg_instruction src dst code insts 36 4
+  |Imull(src, dst) -> twoarg_instruction src dst code insts 36 4 (* il faut le diviser selon les combinaisons d'arguments possibles *)
 
   |Idivl(op) ->
     insts := [|38|]::!insts;
@@ -114,29 +114,29 @@ let sinstructionf code label_references is_main instruction =
   |Movw(src, dst) -> twoarg_instruction src dst code insts 41 4
   |Movl(src, dst) -> twoarg_instruction src dst code insts 43 4
 
-  |Leal(src, dst) -> twoarg_instruction src dst code insts 64 1
+  |Leal(src, dst) -> twoarg_instruction src dst code insts 64 1 (* ne prend pas d'immediat en argument *)
 
-  |Jmp(target) -> code := [[|100; 9995; get_label target label_references|];[|45|]]::!code;
+  |Jmp(target) -> code := [[|100; 9995; get_label target label_references|]; [|45|]]::!code;
 
-  |Je(target) |Jz(target) -> code := [[|100; 9995; get_label target label_references|];[|46|]]::!code;
-  |Jne(target) |Jnz(target) -> code := [[|100; 9995; get_label target label_references|];[|47|]]::!code;
+  |Je(target) |Jz(target) -> code := [[|100; 9995; get_label target label_references|]; [|46|]]::!code;
+  |Jne(target) |Jnz(target) -> code := [[|100; 9995; get_label target label_references|]; [|47|]]::!code;
 
-  |Js(target) -> code := [[|100; 9995; get_label target label_references|];[|48|]]::!code;
-  |Jns(target) -> code := [[|100; 9995; get_label target label_references|];[|49|]]::!code;
+  |Js(target) -> code := [[|100; 9995; get_label target label_references|]; [|48|]]::!code;
+  |Jns(target) -> code := [[|100; 9995; get_label target label_references|]; [|49|]]::!code;
 
-  |Jo(target) -> code := [[|100; 9995; get_label target label_references|];[|50|]]::!code;
-  |Jno(target) -> code := [[|100; 9995; get_label target label_references|];[|51|]]::!code;
+  |Jo(target) -> code := [[|100; 9995; get_label target label_references|]; [|50|]]::!code;
+  |Jno(target) -> code := [[|100; 9995; get_label target label_references|]; [|51|]]::!code;
 
-  |Jc(target) -> code := [[|100; 9995; get_label target label_references|];[|52|]]::!code;
-  |Jnc(target) -> code := [[|100; 9995; get_label target label_references|];[|53|]]::!code;
+  |Jc(target) -> code := [[|100; 9995; get_label target label_references|]; [|52|]]::!code;
+  |Jnc(target) -> code := [[|100; 9995; get_label target label_references|]; [|53|]]::!code;
 
-  |Jge(target) |Jnl(target) -> code := [[|100; 9995; get_label target label_references|];[|54|]]::!code;
-  |Jnge(target) |Jl(target) -> code := [[|100; 9995; get_label target label_references|];[|55|]]::!code;
+  |Jge(target) |Jnl(target) -> code := [[|100; 9995; get_label target label_references|]; [|54|]]::!code;
+  |Jnge(target) |Jl(target) -> code := [[|100; 9995; get_label target label_references|]; [|55|]]::!code;
 
-  |Jle(target) |Jng(target) -> code := [[|100; 9995; get_label target label_references|];[|56|]]::!code;
-  |Jnle(target) |Jg(target) -> code := [[|100; 9995; get_label target label_references|];[|57|]]::!code;
+  |Jle(target) |Jng(target) -> code := [[|100; 9995; get_label target label_references|]; [|56|]]::!code;
+  |Jnle(target) |Jg(target) -> code := [[|100; 9995; get_label target label_references|]; [|57|]]::!code;
 
-  |Call(target) -> code := [[|100; 9995; get_label target label_references|];[|62|]]::!code;
+  |Call(target) -> code := [[|100; 9995; get_label target label_references|]; [|62|]]::!code;
 
   |Ret -> if is_main then code := [[|64|]]::!code else code := [[|63|]]::!code;
 
