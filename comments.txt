@@ -23,7 +23,7 @@ mettre 9980 dans esp au tout début
 
 pc specs : 
 
-cpu : 32 bits, 8 registers, 4 flags, 200Hz clock speed (could in theory be increased up to 10000hz)
+cpu : 32 bits, 8 registers, 4 flags, 200Hz clock speed
 RAM : 40KB
 
 groups : 

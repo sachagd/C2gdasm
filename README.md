@@ -1,6 +1,6 @@
 This project is still in development !
 
-If you want to see what this project is able to do, here's a [video](https://x.com/Sachagd_/status/1940059255047925781) for you.
+If you want to see what this project is able to do, here's a [video](https://x.com/Sachagd_/status/1940383595673350393) for you.
 
 As of now, the instruction set is : 
 
