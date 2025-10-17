@@ -60,21 +60,8 @@ main a lui même un caller (souvent appelé crt0)
 
 gcc -S test.c -m32 -fdirectives-only -fno-ident -fno-pic -fno-pie -fomit-frame-pointer -fcf-protection=none -fno-stack-protector -fno-unwind-tables -fno-asynchronous-unwind-tables -o test.s
 
-
-
-
-
-27 : 11011
-21 : 10101
-
-r  : 10001 
-
-27 = 2 * 13 + 1
-13 = 
-
-
-
-
+première strat : soit n la taille d'une page, on a un counter th : "top heap", a chaque fois qu'il devient plus grand qu'un multiple de n, on alloue une page en plus
+des instant count trigger pour chaque valeur de multiple th qui activent les count triggers 
 
 
 

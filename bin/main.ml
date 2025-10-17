@@ -114,7 +114,7 @@ let sinstructionf code label_references is_main instruction =
   |Movw(src, dst) -> twoarg_instruction src dst code insts 41 4
   |Movl(src, dst) -> twoarg_instruction src dst code insts 43 4
 
-  |Leal(src, dst) -> twoarg_instruction src dst code insts 64 1 (* ne prend pas d'immediat en argument *)
+  |Leal(src, dst) -> twoarg_instruction src dst code insts 65 1 (* ne prend pas d'immediat en argument *)
 
   |Jmp(target) -> code := [[|100; 9995; get_label target label_references|]; [|45|]]::!code;
 
@@ -136,9 +136,19 @@ let sinstructionf code label_references is_main instruction =
   |Jle(target) |Jng(target) -> code := [[|100; 9995; get_label target label_references|]; [|56|]]::!code;
   |Jnle(target) |Jg(target) -> code := [[|100; 9995; get_label target label_references|]; [|57|]]::!code;
 
-  |Call(target) -> code := [[|100; 9995; get_label target label_references|]; [|62|]]::!code;
+  |Call(target) ->
+    (match target with 
+    |Id(label) -> 
+      if Hashtbl.mem label_references label then 
+        code := [[|100; 9995; Hashtbl.find label_references label|]; [|62|]]::!code
+      else
+        let n = if label = "malloc" then 1
+        else if label = "free" then 2
+        else failwith "invalid function call" in
+        code := [[|100; 9995; n|]; [|63|]]::!code
+    | _ -> failwith "invalid target")
 
-  |Ret -> if is_main then code := [[|64|]]::!code else code := [[|63|]]::!code;
+  |Ret -> if is_main then code := [[|65|]]::!code else code := [[|64|]]::!code
 
   | _ -> failwith "invalid instruction"
 
@@ -155,9 +165,9 @@ let rec sfunctionf functions label_references code =
       begin
       List.iter (slabelf label_references code true) labels;
       sfunctionf t label_references code;
-      end
+      end 
     else 
-      begin
+      begin     
       sfunctionf t label_references code;
       List.iter (slabelf label_references code false) labels;
       end
@@ -183,7 +193,7 @@ let json_of_int_arr_list_list xs =
   )
 
 let () =
-  let filename = "test.s" in
+  let filename = "code.s" in
   let channel = open_in filename in
   let lexbuf = Lexing.from_channel channel in
   let ast = Parser.program Lexer.token lexbuf in

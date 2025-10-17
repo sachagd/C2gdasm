@@ -1,12 +1,6 @@
 _build/
 
 
-code.c
-code.s
-code.json
-
-test.c 
-test.s
-
-test2.c
-test2.s
+*.c
+*.s
+*.json

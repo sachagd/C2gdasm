@@ -1,5 +1,4 @@
 {
-  
 open Parser
 exception Lexing_error of string
 }
