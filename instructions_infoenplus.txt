@@ -1,2 +1,0 @@
-displacement(base, index, scale), and it calculates the effective address as: base + (index * scale) + displacement.
-movl	%edx, 20(%esp,%eax,4) -> Address = ESP + (EAX * 4) + 20

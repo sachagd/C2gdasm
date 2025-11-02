@@ -10,20 +10,10 @@ type argument =
   | Id of string
 
 type instruction = 
-  | Addb of argument * argument
-  | Addw of argument * argument
   | Addl of argument * argument
-  | Subb of argument * argument
-  | Subw of argument * argument
   | Subl of argument * argument
-  | Cmpb of argument * argument
-  | Cmpw of argument * argument
   | Cmpl of argument * argument
-  | Imulb of argument * argument
-  | Imulw of argument * argument
   | Imull of argument * argument
-  | Idivb of argument
-  | Idivw of argument
   | Idivl of argument
   | Cltd
   | Notb of argument * argument

@@ -1,4 +1,3 @@
-choisir rbp (register base pointer) à la fin du tas, probablement quelque chose vers 9500
 la gestion de la mémoire du tas se fait du haut vers le bas. 
 
 exécution de code asm -> gros bloc de mémoire tas alloué
@@ -15,7 +14,7 @@ appel imbriqué, les stack frame sont empilés du haut vers le bas, en bas l'app
 +---------------------+  <-- Lower addresses
 
 return address permet de sortir de la fonction et retourner au bon endroit pour exécuter la suite du code asm
-base caller permet de sortir de la fonction et retourner au bon endroit sur la tas
+base caller permet de sortir de la fonction et retourner au bon endroit sur le tas
 
 quand t'appelle une fonction, il se passe deux choses : tu sauvegardes le current rbp dans le stack frame de la nouvelle fonction appelé (décrit juste au dessus)
 comme ça tout en haut du stack frame, t'as les infos pour sortir de la fonction
@@ -42,35 +41,43 @@ For registers R8 through R15, the naming is slightly different:
     The lower 16‑bit part: add a "W", e.g., R8W
     The lower 8‑bit part: add a "B", e.g., R8B
 
-forcer à compiler en 32 bits
-apparement flag -m32 le permet ça semble marcher
-
-tout faire en 32 bits
-
 certaines instructions peuvent s'exécuter sur le tas mais d'autres non (t[i]) -> faut multiplier i par la taille des éléments de t puis ajouter à l'adresse de t etc..
 un même code asm peut faire les deux sur une même variable
 
 spilled -> mettre sur le tas
 
-peut être preprocess le code asm pour remplacer tout les -140(%rbp) par des constantes puis à la place de déplacer chaque instructions avec les inputs/outputs,
-copier/coller l'instruction directement déjà prête à exécuter
-
 Bonus : 
 main a lui même un caller (souvent appelé crt0)
-
-gcc -S test.c -m32 -fdirectives-only -fno-ident -fno-pic -fno-pie -fomit-frame-pointer -fcf-protection=none -fno-stack-protector -fno-unwind-tables -fno-asynchronous-unwind-tables -o test.s
 
 première strat : soit n la taille d'une page, on a un counter th : "top heap", a chaque fois qu'il devient plus grand qu'un multiple de n, on alloue une page en plus
 des instant count trigger pour chaque valeur de multiple th qui activent les count triggers 
 
+pour la création du tas, le pb des count trigger qui active si c est dans [a,b] et que item id n va de a à b pourquoi
+pas utiliser un item compare trigger après si vrai alors on écrit vraiment sinon on stop trigger (est ce vraiment nécessaire ?) et après on ramène sur le count trigger avec un spawn trigger
 
+pour la pagination faire une page de taille plutôt qu'un compteur global, utiliser un algo très simple, genre first-fit
+pour pouvoir défragmenter en un seul tick, le faire page par page mais tout d'affiler (est ce qu'on s'en fout pas un peu de défragmenter ?)
 
+après une instruction set, il y aura en principe nécessairement un movzbl. Il faut donc les combiner
 
+	sete	%al
+	setne	%al
+	setle	%al
+	setg	%al
+	setge	%al
 
+    set.. %al 
+    movzbl %al, %eax
+    
+    ne pas oublier d'enlever 1 à chaque fois qu'on lit un set.. pendant le pre-processing puisqu'on combine des instructions
 
+-> checker toutes les variantes de set
 
+multiplication et division ne touchent pas à CF et OF (en principe non mais en pratique ça change rien)
+pour les divisions, utiliser l'item edit trigger 
+les overflow pour la multiplication sont à proscrire
 
+si ~9K lignes de code ne suffit pas, avec 10 groupesID grâce au théorème de Sperner, on peut créer 184756 sous ensemble de combinaisons de groupeID deux à deux distincts
 
-
-
-
+on enlève les variantes ...w et ...b des opérations arithmetiques, j'ai aussi enlevé pour les bitwise op mais je sais plus pourquoi
+faire des optimisations pour des "test %eax %eax" -> ici on peut juste utiliser un instant count trigger "=0"

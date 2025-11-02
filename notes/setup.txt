@@ -8,9 +8,14 @@ trucs qui pourrait être fait :
 
 mettre 9980 dans esp au tout début
 
+
+1 - 4001 : screen memory
+
+9974 - 9979 : input buffer (q z d left up right)
+9980 : global timer
 9981 : temp mem -> vérfier qu'enlever 9982 ne pose pas de problème (avant c'était également dans temp mem)
 9982 : program counter
-9983-9990 : %eax, %ebx, %ecx, %edx, %esi, %edi, %ebp, %esp
+9983 - 9990 : %eax, %ebx, %ecx, %edx, %esi, %edi, %ebp, %esp
 9991 : zero flag
 9992 : sign flag
 9993 : overflow flag
@@ -23,16 +28,17 @@ mettre 9980 dans esp au tout début
 
 pc specs : 
 
-cpu : 32 bits, 8 registers, 4 flags, 200Hz clock speed
+cpu : 32 bits, 8 registers, 4 flags, 100KHz clock speed
 RAM : 40KB
-
-groups : 
-    - 0 to 100 : opcodes
+    
+groups :
+    - 1 to 4001 : screen colors (en superposition avec le reste mais pas grave)
+    - 1 to 100 : opcodes
     - 100 to 200 : extra groups for instructions execution
     - 200 to 300 : flags update (surement pas besoin d'autant)
     - 300 + whatever flags update take to the same plus some tiny constant : main loop
-    - 3?? to 10000 : code 
-
+    - 3?? to 9997 : code
+    - 9998 : tp setup
 
 carry flag : 
     add : (src < 0 && dst < 0) || (src < 0 && dst >= 0 && src + dst >= 0) || (src >= 0 && dst < 0 && src + dst >= 0)
@@ -47,9 +53,4 @@ carry flag :
 103 : item edit trigger, ajoute la valeur stockée dans un iid -> [|103, iid d'écriture, iid de lecture|]
 104 : pickup trigger, multiplie par une constante -> [|104, iid d'écriture, constante|]
 
-jge = jnl 
-jnge = jl
-
-jg = jnle
-jng = jle
-
+1,3619,2,735,3,165,57,62,155,2,62,1,87,1,36,1,80,9982,476,1,478,1,51,9990,479,1,481,1,482,3,241,0,242,0,243,1;

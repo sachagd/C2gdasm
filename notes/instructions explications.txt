@@ -1,15 +1,9 @@
-FLAGS register, chaque bit est utilisé pour des résultats d'opération arithmétiques mais pas que.
-Est ce que j'utilise un seul compteur pour tous les flags ou un compteur par flag ? 
-
-Ceux qui peuvent être utilisé par un code asm généré par compilation de code c sont (pas certain qu'il y ait que ceux là mais normalement si quand même): 
-
 Zero Flag (ZF): Indicates whether the result of an operation is zero.
 Sign Flag (SF): Reflects whether the result is negative.
 Carry Flag (CF): Indicates an overflow from the most significant bit in unsigned arithmetic.
 Overflow Flag (OF): Signals an overflow in signed arithmetic.
 Parity Flag (PF) (occasionally) -> utilisé apparement par les instructions jp jpe jpo setp setnp, ça à pas l'air fréquent mais peut être quand même l'implémenter
 Auxiliary Flag (AF) (rarely, and mostly in specific cases like BCD arithmetic)
-
 
 test <operand1>, <operand2>
     Both operands can be registers, memory locations, or an immediate value and a register/memory. However, at least one operand must be non-immediate

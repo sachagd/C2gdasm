@@ -1,6 +1,6 @@
 _build/
 
 
-*.c
-*.s
-*.json
+# *.c
+# *.s
+# *.json

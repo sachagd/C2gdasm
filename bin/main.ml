@@ -1,16 +1,16 @@
 open Ast
 
-let rec finstructionf instructions =
+let rec finstructionf instructions acc =
   match instructions with 
-  |[] -> 0
-  |Cltd::t -> finstructionf t
-  |_::t -> 1 + finstructionf t 
+  |[] -> acc
+  |Cltd::t -> finstructionf t acc
+  |_::t -> finstructionf t (acc + 1)
 
 let flabelf label_references program_counter label =
   match label with
   |Label(name, instructions) ->
     Hashtbl.add label_references (String.sub name 0 (String.length name - 1)) !program_counter;
-    program_counter := !program_counter + finstructionf instructions
+    program_counter := !program_counter + finstructionf instructions 0
 
 let rec ffunctionf functions label_references program_counter =
   match functions with 
@@ -75,32 +75,17 @@ let get_label target label_references =
 let sinstructionf code label_references is_main instruction = 
   let insts = ref [] in 
   match instruction with 
-  |Addb(src, dst) -> twoarg_instruction src dst code insts 1 4
-  |Addw(src, dst) -> twoarg_instruction src dst code insts 3 4
   |Addl(Imm(imm), Reg1("%esp")) -> code := [[|100; 9995; imm / 4|]; [|100; 9997; 9990|]; [|5|]]::!code 
   |Addl(src, dst) -> twoarg_instruction src dst code insts 5 4
   
-  |Subb(src, dst) -> twoarg_instruction src dst code insts 7 4                                                                                                                                                                                                                                                   
-  |Subw(src, dst) -> twoarg_instruction src dst code insts 9 4
   |Subl(Imm(imm), Reg1("%esp")) -> code := [[|100; 9995; imm / 4|]; [|100; 9997; 9990|]; [|11|]]::!code
   |Subl(src, dst) -> twoarg_instruction src dst code insts 11 4
-
-  |Cmpb(src, dst) -> twoarg_instruction src dst code insts 13 4
-  |Cmpw(src, dst) -> twoarg_instruction src dst code insts 15 4
   |Cmpl(src, dst) -> twoarg_instruction src dst code insts 17 4
 
-  |Andb(src, dst) -> twoarg_instruction src dst code insts 19 4
-  |Andw(src, dst) -> twoarg_instruction src dst code insts 21 4
   |Andl(src, dst) -> twoarg_instruction src dst code insts 23 4
-
-  |Testb(op1, op2) -> twoarg_instruction op1 op2 code insts 25 4
-  |Testw(op1, op2) -> twoarg_instruction op1 op2 code insts 27 4
   |Testl(op1, op2) -> twoarg_instruction op1 op2 code insts 29 4
-
-  |Xorb(src, dst) -> twoarg_instruction src dst code insts 31 4
-  |Xorw(src, dst) -> twoarg_instruction src dst code insts 33 4
-  |Xorl(src, dst) -> twoarg_instruction src dst code insts 35 4
-    
+  |Xorl(src, dst)  -> twoarg_instruction src dst code insts 35 4
+  
   |Imull(src, dst) -> twoarg_instruction src dst code insts 36 4 (* il faut le diviser selon les combinaisons d'arguments possibles *)
 
   |Idivl(op) ->

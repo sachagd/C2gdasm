@@ -4,15 +4,17 @@ If you want to see what this project is able to do, here's a [video](https://x.c
 
 As of now, the instruction set is : 
 
-    - add, sub, cmp, imul, idiv, cltd 
-    - not, or, and, test, xor 
+    - addl, subl, cmpl, imull, idivl, cltd 
+    - notl, orl, andl, testl, xorl 
     - jmp, je/jz, jne/jnz, js, jns, jo, jno, jc, jnc, jge/jnl, jnge/jl, jle/jng, jnle/jg
-    - mov, lea, push, pop
+    - movb, movw, movl, lea, push, pop
     - call, ret, halt
+
+Arithmetic operations and bitwise operations on 8bits and 16 bits registers will probably not be implemented
 
 What i'm doing right now : 
 
-    creating distinct opcode based on the operation size (add -> addb, addw, addl)
+    adding a GUI
     finding optimised way to do bitwise operation (if you know a way to do that i'm interested, dm me on discord)
     creating a heap
 

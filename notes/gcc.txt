@@ -1,0 +1,17 @@
+gcc -S test.c -m32 -fno-ident -fno-pic -fno-pie -fomit-frame-pointer -fcf-protection=none -fno-stack-protector -fno-unwind-tables -fno-asynchronous-unwind-tables -o test.s
+
+-S : compile vers de l'assembleur
+
+-m32 : compile pour une architecture 32 bits
+
+-fno-ident : enlève la ligne ".ident	"GCC: (Ubuntu 11.4.0-1ubuntu1~22.04.2) 11.4.0"
+
+-fno-pie -fno-pic : enlève l'utilisation de la GLOBAL_OFFSET_TABLE
+
+-fno-stack-protector : enlève la sécurité sur les overflow de buffer. Nécessaire pour que -fno-frame-pointer prenne effet 
+
+-fnomit-frame-pointer : enlève l'utilisation de %ebp
+
+-fcf-protection=none : enlève endbr32 et endbr64 (instructions de contrôle)
+
+-fno-unwind-tables & -fno-asynchrnous-unwind-tables : enlève des métadonnées
