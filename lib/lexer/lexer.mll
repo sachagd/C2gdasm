@@ -16,20 +16,10 @@ rule token = parse
   | "$" digit+ as s                 { IMMEDIATE (int_of_string (String.sub s 1 (String.length s - 1))) }
   | ['-']? ['0'-'9']+ as num        { NUMBER (int_of_string num) }
 
-  | "addb"       { ADDB }
-  | "addw"       { ADDW }
   | "addl"       { ADDL }
-  | "subb"       { SUBB }
-  | "subw"       { SUBW }
   | "subl"       { SUBL }
-  | "cmpb"       { CMPB }
-  | "cmpw"       { CMPW }
   | "cmpl"       { CMPL }
-  | "imulb"      { IMULB }
-  | "imulw"      { IMULW }
   | "imull"      { IMULL }
-  | "idivb"      { IDIVB }
-  | "idivw"      { IDIVW }
   | "idivl"      { IDIVL }
   | "cltd"       { CLTD }
   | "notb"       { NOTB }

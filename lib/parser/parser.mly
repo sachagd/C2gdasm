@@ -10,7 +10,7 @@
 %token <int> NUMBER 
 %token <string> IDENT
 %token <string> FUNCTION
-%token ADDB ADDW ADDL SUBB SUBW SUBL CMPB CMPW CMPL CLTD IMULB IMULW IMULL IDIVB IDIVW IDIVL
+%token ADDL SUBL CMPL CLTD IMULL IDIVL
 %token NOTB NOTW NOTL ORB ORW ORL ANDB ANDW ANDL TESTB TESTW TESTL XORB XORW XORL
 %token MOVB MOVW MOVL PUSHB PUSHW PUSHL POPB POPW POPL LEAL
 %token JMP JE JZ JNE JNZ JS JNS JO JNO JC JNC JGE JNL JNGE JL JLE JNG JNLE JG
@@ -33,20 +33,10 @@ argument:
   | IDENT { Id($1) }
 
 instruction:
-  | ADDB argument COMMA argument   { Addb($2, $4) }
-  | ADDW argument COMMA argument   { Addw($2, $4) }
   | ADDL argument COMMA argument   { Addl($2, $4) }
-  | SUBB argument COMMA argument   { Subb($2, $4) }
-  | SUBW argument COMMA argument   { Subw($2, $4) }
   | SUBL argument COMMA argument   { Subl($2, $4) }
-  | CMPB argument COMMA argument   { Cmpb($2, $4) }
-  | CMPW argument COMMA argument   { Cmpw($2, $4) }
   | CMPL argument COMMA argument   { Cmpl($2, $4) }
-  | IMULB argument COMMA argument  { Imulb($2, $4) }
-  | IMULW argument COMMA argument  { Imulw($2, $4) }
   | IMULL argument COMMA argument  { Imull($2, $4) }
-  | IDIVB argument                { Idivb($2) }
-  | IDIVW argument                { Idivw($2) }
   | IDIVL argument                { Idivl($2) }
   | CLTD                          { Cltd }
   | NOTB argument COMMA argument  { Notb($2, $4) }
