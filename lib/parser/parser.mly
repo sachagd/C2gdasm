@@ -11,10 +11,10 @@
 %token <string> IDENT
 %token <string> FUNCTION
 %token ADDL SUBL CMPL CLTD IMULL IDIVL
-%token NOTB NOTW NOTL ORB ORW ORL ANDB ANDW ANDL TESTB TESTW TESTL XORB XORW XORL
+%token NOTB NOTW NOTL ORB ORW ORL ANDB ANDW ANDL TESTB TESTW TESTL XORB XORW XORL SALL SHRL
 %token MOVB MOVW MOVL PUSHB PUSHW PUSHL POPB POPW POPL LEAL
 %token JMP JE JZ JNE JNZ JS JNS JO JNO JC JNC JGE JNL JNGE JL JLE JNG JNLE JG
-%token CALL RET LEAVE
+%token CALL RET LEAVE NOP
 %token COMMA LPAREN RPAREN EOF
 
 %start program
@@ -54,6 +54,8 @@ instruction:
   | XORB argument COMMA argument  { Xorb($2, $4) }
   | XORW argument COMMA argument  { Xorw($2, $4) }
   | XORL argument COMMA argument  { Xorl($2, $4) }
+  | SALL argument COMMA argument  { Sall($2, $4) }
+  | SHRL argument COMMA argument  { Shrl($2, $4) }
   | MOVB argument COMMA argument   { Movb($2, $4) }
   | MOVW argument COMMA argument   { Movw($2, $4) }
   | MOVL argument COMMA argument   { Movl($2, $4) }
@@ -86,6 +88,7 @@ instruction:
   | CALL argument                 { Call($2) }
   | RET                           { Ret }
   | LEAVE                         { Leave }
+  | NOP               { Nop }
 
 dirarg:
   | IDENT { Id($1) }

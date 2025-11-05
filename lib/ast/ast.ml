@@ -31,6 +31,8 @@ type instruction =
   | Xorb of argument * argument
   | Xorw of argument * argument
   | Xorl of argument * argument
+  | Sall of argument * argument
+  | Shrl of argument * argument
   | Movb of argument * argument
   | Movw of argument * argument
   | Movl of argument * argument
@@ -63,6 +65,7 @@ type instruction =
   | Call of argument
   | Ret
   | Leave
+  | Nop
   | Dir of string * argument list
 
 type label = 

@@ -15,10 +15,11 @@
 	leave
 
 
-	sall	$2, %eax
-	nop
-	shrl	$23, %edx
 	orl	$0, (%esp)
 	andl	$-16, %esp
 	testl	%eax, %eax
+
+	sall	$2, %eax
+	nop
+	shrl	$23, %edx
 	call	gd_putpixel_simplified

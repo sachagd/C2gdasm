@@ -106,4 +106,29 @@ ret
     Operation: Pops the return address from the top of the stack and transfers control to that address; if an immediate value is provided (e.g., ret 8), it is added to the stack pointer after popping to remove additional arguments; no flags are modified.
     Return address: Retrieved from the stack and used to resume execution at that location.
 
+sall <count>, <destination>
+    Operation: Shifts the bits of the destination operand to the left by the number of positions specified in <count>. Vacated low-order bits are filled with 0; high-order bits shifted out are discarded.
+    Destination operand: The second operand (register or memory); it is overwritten with the result.
+    Count operand: Either the immediate value 1, an 8-bit immediate, or the value in CL.
+    Zero flag: 1 if result is 0, 0 otherwise.
+    Sign flag: 1 if most significant bit of result is 1, 0 otherwise.
+    Parity flag: 1 if the low-order byte of result has an even number of 1 bits, 0 otherwise.
+    Overflow flag: For a 1-bit shift, set to the XOR of the top two bits of the original destination; for shifts greater than 1, undefined.
+    Carry flag: Set to the last bit shifted out of the most significant bit.
+
+nop
+    Operation: Performs no operation; execution continues with the next instruction.
+    Affected flags: None
+
+shrl <count>, <destination>
+    Operation: Shifts the bits of the destination operand to the right by the number of positions specified in <count>. Vacated high-order bits are filled with 0; low-order bits shifted out are discarded.
+    Destination operand: The second operand (register or memory); it is overwritten with the result.
+    Count operand: Either the immediate value 1, an 8-bit immediate, or the value in CL.
+    Zero flag: 1 if result is 0, 0 otherwise.
+    Sign flag: 1 if most significant bit of result is 1, 0 otherwise.
+    Parity flag: 1 if the low-order byte of result has an even number of 1 bits, 0 otherwise.
+    Overflow flag: For a 1-bit shift, set to the original most significant bit of the destination; for shifts greater than 1, undefined.
+    Carry flag: Set to the last bit shifted out of the least significant bit.
+
+
 Je pense que je peux regrouper certaines instructions ensemble mais je suis pas sûr. Il y a même moyen je peux juste ignorer certaines.

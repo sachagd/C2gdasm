@@ -3,7 +3,7 @@ open Ast
 let rec finstructionf instructions acc =
   match instructions with 
   |[] -> acc
-  |Cltd::t -> finstructionf t acc
+  |(Cltd|Nop)::t -> finstructionf t acc
   |_::t -> finstructionf t (acc + 1)
 
 let flabelf label_references program_counter label =
@@ -72,6 +72,21 @@ let get_label target label_references =
   |Id(label) -> Hashtbl.find label_references label
   | _ -> failwith "invalid target"
 
+let opcall op =
+  match op with
+  |"gd_putpixel_simplified" -> 0
+  |"gd_a_pressed" -> 1
+  |"gd_w_pressed" -> 2
+  |"gd_d_pressed" -> 3
+  |"gd_left_pressed" -> 4
+  |"gd_up_pressed" -> 5
+  |"gd_right_pressed" -> 6
+  |"gd_waitnextframe" -> 7
+  |"gd_randint" -> 8
+  |"malloc" -> 100
+  |"free" -> 101
+  |_ -> failwith "invalid function call"
+
 let sinstructionf code label_references is_main instruction = 
   let insts = ref [] in 
   match instruction with 
@@ -82,66 +97,81 @@ let sinstructionf code label_references is_main instruction =
   |Subl(src, dst) -> twoarg_instruction src dst code insts 3 4
   |Cmpl(src, dst) -> twoarg_instruction src dst code insts 5 4
 
-  |Andl(src, dst) -> twoarg_instruction src dst code insts 7 4
-  |Testl(op1, op2) -> twoarg_instruction op1 op2 code insts 9 4
-  |Xorl(src, dst)  -> twoarg_instruction src dst code insts 11 4
-  
   |Imull(src, dst) -> 
-    insts := [|13|]::!insts;
+    insts := [|7|]::!insts;
     argumentf dst insts 2 4;
     argumentf src insts 0 4;
     code := !insts::!code
 
   |Idivl(op) ->
-    insts := [|14|]::!insts;
+    insts := [|8|]::!insts;
     argumentf op insts 0 4;
     code := !insts::!code;
 
   |Cltd -> ()
 
-  |Movb(src, dst) -> twoarg_instruction src dst code insts 15 4
-  |Movw(src, dst) -> twoarg_instruction src dst code insts 17 4
-  |Movl(src, dst) -> twoarg_instruction src dst code insts 19 4
+  |Notl(src, dst) -> twoarg_instruction src dst code insts 9 4 (*choisir opcode*)
+  |Orl(src, dst) -> twoarg_instruction src dst code insts 11 4 (*choisir opcode*)
+  |Andl(src, dst) -> twoarg_instruction src dst code insts 13 4
+  |Testl(Reg1(r1),Reg1(r2)) when r1 = r2 -> code := [[|100; 9995; get_register r1|]; [|15|]]::!code (*choisir le bon opcode*)
+  |Testl(op1, op2) -> twoarg_instruction op1 op2 code insts 16 4
+  |Xorl(src, dst)  -> twoarg_instruction src dst code insts 18 4
+
+  |Sall(count, dst) -> twoarg_instruction count dst code insts 20 4 (*choisir opcode*)
+  |Shrl(count, dst) -> twoarg_instruction count dst code insts 22 4 (*choisir opcode*)
+
+  |Movl(src, dst) -> twoarg_instruction src dst code insts 24 4
+
+  |Pushl(op) ->
+    insts := [|26 + inst_type op|]::!insts; (* choisir opcode*)
+    argumentf op insts 0 4;
+    code := !insts::!code
+  
+  |Popl(op) ->
+    insts := [|28 + inst_type op|]::!insts; (* choisir opcode*)
+    argumentf op insts 0 4;
+    code := !insts::!code
 
   |Leal(src, dst) ->
-    insts := [|20|]::!insts;
+    insts := [|29|]::!insts;
     argumentf dst insts 2 1;
     argumentf src insts 0 1;
     code := !insts::!code
 
-  |Jmp(target) -> code := [[|100; 9995; get_label target label_references|]; [|21|]]::!code;
+  |Jmp(target) -> code := [[|100; 9995; get_label target label_references|]; [|30|]]::!code;
 
-  |Je(target) |Jz(target) -> code := [[|100; 9995; get_label target label_references|]; [|22|]]::!code;
-  |Jne(target) |Jnz(target) -> code := [[|100; 9995; get_label target label_references|]; [|23|]]::!code;
+  |Je(target) |Jz(target) -> code := [[|100; 9995; get_label target label_references|]; [|31|]]::!code;
+  |Jne(target) |Jnz(target) -> code := [[|100; 9995; get_label target label_references|]; [|32|]]::!code;
 
-  |Js(target) -> code := [[|100; 9995; get_label target label_references|]; [|24|]]::!code;
-  |Jns(target) -> code := [[|100; 9995; get_label target label_references|]; [|25|]]::!code;
+  |Js(target) -> code := [[|100; 9995; get_label target label_references|]; [|33|]]::!code;
+  |Jns(target) -> code := [[|100; 9995; get_label target label_references|]; [|34|]]::!code;
 
-  |Jo(target) -> code := [[|100; 9995; get_label target label_references|]; [|26|]]::!code;
-  |Jno(target) -> code := [[|100; 9995; get_label target label_references|]; [|27|]]::!code;
+  |Jo(target) -> code := [[|100; 9995; get_label target label_references|]; [|35|]]::!code;
+  |Jno(target) -> code := [[|100; 9995; get_label target label_references|]; [|36|]]::!code;
 
-  |Jc(target) -> code := [[|100; 9995; get_label target label_references|]; [|28|]]::!code;
-  |Jnc(target) -> code := [[|100; 9995; get_label target label_references|]; [|29|]]::!code;
+  |Jc(target) -> code := [[|100; 9995; get_label target label_references|]; [|37|]]::!code;
+  |Jnc(target) -> code := [[|100; 9995; get_label target label_references|]; [|38|]]::!code;
 
-  |Jge(target) |Jnl(target) -> code := [[|100; 9995; get_label target label_references|]; [|30|]]::!code;
-  |Jnge(target) |Jl(target) -> code := [[|100; 9995; get_label target label_references|]; [|31|]]::!code;
+  |Jge(target) |Jnl(target) -> code := [[|100; 9995; get_label target label_references|]; [|39|]]::!code;
+  |Jnge(target) |Jl(target) -> code := [[|100; 9995; get_label target label_references|]; [|40|]]::!code;
 
-  |Jle(target) |Jng(target) -> code := [[|100; 9995; get_label target label_references|]; [|32|]]::!code;
-  |Jnle(target) |Jg(target) -> code := [[|100; 9995; get_label target label_references|]; [|33|]]::!code;
+  |Jle(target) |Jng(target) -> code := [[|100; 9995; get_label target label_references|]; [|41|]]::!code;
+  |Jnle(target) |Jg(target) -> code := [[|100; 9995; get_label target label_references|]; [|42|]]::!code;
 
   |Call(target) ->
     (match target with 
     |Id(label) -> 
       if Hashtbl.mem label_references label then 
-        code := [[|100; 9995; Hashtbl.find label_references label|]; [|34|]]::!code
+        code := [[|100; 9995; Hashtbl.find label_references label|]; [|46|]]::!code
       else
-        let n = if label = "malloc" then 1
-        else if label = "free" then 2
-        else failwith "invalid function call" in
-        code := [[|100; 9995; n|]; [|35|]]::!code
+        code := [[|47 + opcall label|]]::!code
     | _ -> failwith "invalid target")
 
-  |Ret -> if is_main then code := [[|37|]]::!code else code := [[|36|]]::!code
+  |Ret -> if is_main then code := [[|43|]]::!code else code := [[|44|]]::!code
+
+  |Leave -> code := [[|45|]]::!code (*choisir opcode*)
+  
+  |Nop -> ()
 
   | _ -> failwith "invalid instruction"
 

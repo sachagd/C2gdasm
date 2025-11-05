@@ -37,6 +37,8 @@ rule token = parse
   | "xorb"       { XORB }
   | "xorw"       { XORW }
   | "xorl"       { XORL }
+  | "sall"       { SALL }
+  | "shrl"       { SHRL }
   | "movb"       { MOVB }
   | "movw"       { MOVW }
   | "movl"       { MOVL }
@@ -69,6 +71,7 @@ rule token = parse
   | "call"       { CALL }
   | "ret"        { RET }
   | "leave"      { LEAVE }
+  | "nop"        { NOP }
 
   | ","                             { COMMA }
   | "("                             { LPAREN }
