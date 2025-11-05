@@ -1,0 +1,24 @@
+	subl	$12, %esp
+	movl	20(%esp), %edx
+	addl	%edx, %eax
+	leal	(%edx,%eax), %ecx
+	ret
+	jmp	.L3
+	pushl	52(%esp)
+	cmpl	40(%esp), %eax
+	jl	.L5
+	jne	.L9
+	je	.L17
+	js	.L21
+	jg	.L21
+	cltd
+	leave
+
+
+	sall	$2, %eax
+	nop
+	shrl	$23, %edx
+	orl	$0, (%esp)
+	andl	$-16, %esp
+	testl	%eax, %eax
+	call	gd_putpixel_simplified

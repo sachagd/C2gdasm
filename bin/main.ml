@@ -75,65 +75,73 @@ let get_label target label_references =
 let sinstructionf code label_references is_main instruction = 
   let insts = ref [] in 
   match instruction with 
-  |Addl(Imm(imm), Reg1("%esp")) -> code := [[|100; 9995; imm / 4|]; [|100; 9997; 9990|]; [|5|]]::!code 
-  |Addl(src, dst) -> twoarg_instruction src dst code insts 5 4
+  |Addl(Imm(imm), Reg1("%esp")) -> code := [[|100; 9995; imm / 4|]; [|100; 9997; 9990|]; [|1|]]::!code 
+  |Addl(src, dst) -> twoarg_instruction src dst code insts 1 4
   
-  |Subl(Imm(imm), Reg1("%esp")) -> code := [[|100; 9995; imm / 4|]; [|100; 9997; 9990|]; [|11|]]::!code
-  |Subl(src, dst) -> twoarg_instruction src dst code insts 11 4
-  |Cmpl(src, dst) -> twoarg_instruction src dst code insts 17 4
+  |Subl(Imm(imm), Reg1("%esp")) -> code := [[|100; 9995; imm / 4|]; [|100; 9997; 9990|]; [|3|]]::!code
+  |Subl(src, dst) -> twoarg_instruction src dst code insts 3 4
+  |Cmpl(src, dst) -> twoarg_instruction src dst code insts 5 4
 
-  |Andl(src, dst) -> twoarg_instruction src dst code insts 23 4
-  |Testl(op1, op2) -> twoarg_instruction op1 op2 code insts 29 4
-  |Xorl(src, dst)  -> twoarg_instruction src dst code insts 35 4
+  |Andl(src, dst) -> twoarg_instruction src dst code insts 7 4
+  |Testl(op1, op2) -> twoarg_instruction op1 op2 code insts 9 4
+  |Xorl(src, dst)  -> twoarg_instruction src dst code insts 11 4
   
-  |Imull(src, dst) -> twoarg_instruction src dst code insts 36 4 (* il faut le diviser selon les combinaisons d'arguments possibles *)
+  |Imull(src, dst) -> 
+    insts := [|13|]::!insts;
+    argumentf dst insts 2 4;
+    argumentf src insts 0 4;
+    code := !insts::!code
 
   |Idivl(op) ->
-    insts := [|38|]::!insts;
+    insts := [|14|]::!insts;
     argumentf op insts 0 4;
     code := !insts::!code;
 
   |Cltd -> ()
 
-  |Movb(src, dst) -> twoarg_instruction src dst code insts 39 4
-  |Movw(src, dst) -> twoarg_instruction src dst code insts 41 4
-  |Movl(src, dst) -> twoarg_instruction src dst code insts 43 4
+  |Movb(src, dst) -> twoarg_instruction src dst code insts 15 4
+  |Movw(src, dst) -> twoarg_instruction src dst code insts 17 4
+  |Movl(src, dst) -> twoarg_instruction src dst code insts 19 4
 
-  |Leal(src, dst) -> twoarg_instruction src dst code insts 65 1 (* ne prend pas d'immediat en argument *)
+  |Leal(src, dst) ->
+    insts := [|20|]::!insts;
+    argumentf dst insts 2 1;
+    argumentf src insts 0 1;
+    code := !insts::!code
 
-  |Jmp(target) -> code := [[|100; 9995; get_label target label_references|]; [|45|]]::!code;
+  |Jmp(target) -> code := [[|100; 9995; get_label target label_references|]; [|21|]]::!code;
 
-  |Je(target) |Jz(target) -> code := [[|100; 9995; get_label target label_references|]; [|46|]]::!code;
-  |Jne(target) |Jnz(target) -> code := [[|100; 9995; get_label target label_references|]; [|47|]]::!code;
+  |Je(target) |Jz(target) -> code := [[|100; 9995; get_label target label_references|]; [|22|]]::!code;
+  |Jne(target) |Jnz(target) -> code := [[|100; 9995; get_label target label_references|]; [|23|]]::!code;
 
-  |Js(target) -> code := [[|100; 9995; get_label target label_references|]; [|48|]]::!code;
-  |Jns(target) -> code := [[|100; 9995; get_label target label_references|]; [|49|]]::!code;
+  |Js(target) -> code := [[|100; 9995; get_label target label_references|]; [|24|]]::!code;
+  |Jns(target) -> code := [[|100; 9995; get_label target label_references|]; [|25|]]::!code;
 
-  |Jo(target) -> code := [[|100; 9995; get_label target label_references|]; [|50|]]::!code;
-  |Jno(target) -> code := [[|100; 9995; get_label target label_references|]; [|51|]]::!code;
+  |Jo(target) -> code := [[|100; 9995; get_label target label_references|]; [|26|]]::!code;
+  |Jno(target) -> code := [[|100; 9995; get_label target label_references|]; [|27|]]::!code;
 
-  |Jc(target) -> code := [[|100; 9995; get_label target label_references|]; [|52|]]::!code;
-  |Jnc(target) -> code := [[|100; 9995; get_label target label_references|]; [|53|]]::!code;
+  |Jc(target) -> code := [[|100; 9995; get_label target label_references|]; [|28|]]::!code;
+  |Jnc(target) -> code := [[|100; 9995; get_label target label_references|]; [|29|]]::!code;
 
-  |Jge(target) |Jnl(target) -> code := [[|100; 9995; get_label target label_references|]; [|54|]]::!code;
-  |Jnge(target) |Jl(target) -> code := [[|100; 9995; get_label target label_references|]; [|55|]]::!code;
+  |Jge(target) |Jnl(target) -> code := [[|100; 9995; get_label target label_references|]; [|30|]]::!code;
+  |Jnge(target) |Jl(target) -> code := [[|100; 9995; get_label target label_references|]; [|31|]]::!code;
 
-  |Jle(target) |Jng(target) -> code := [[|100; 9995; get_label target label_references|]; [|56|]]::!code;
-  |Jnle(target) |Jg(target) -> code := [[|100; 9995; get_label target label_references|]; [|57|]]::!code;
+  |Jle(target) |Jng(target) -> code := [[|100; 9995; get_label target label_references|]; [|32|]]::!code;
+  |Jnle(target) |Jg(target) -> code := [[|100; 9995; get_label target label_references|]; [|33|]]::!code;
 
   |Call(target) ->
     (match target with 
     |Id(label) -> 
       if Hashtbl.mem label_references label then 
-        code := [[|100; 9995; Hashtbl.find label_references label|]; [|62|]]::!code
+        code := [[|100; 9995; Hashtbl.find label_references label|]; [|34|]]::!code
       else
         let n = if label = "malloc" then 1
         else if label = "free" then 2
         else failwith "invalid function call" in
-        code := [[|100; 9995; n|]; [|63|]]::!code
+        code := [[|100; 9995; n|]; [|35|]]::!code
     | _ -> failwith "invalid target")
 
-  |Ret -> if is_main then code := [[|65|]]::!code else code := [[|64|]]::!code
+  |Ret -> if is_main then code := [[|37|]]::!code else code := [[|36|]]::!code
 
   | _ -> failwith "invalid instruction"
 

@@ -1,4 +1,4 @@
-# C → x86 asm → GDasm (Geometry Dash) — Concise Recap
+# C → x86 asm → GDasm (Geometry Dash) — Recap
 
 ## Goal
 Transpile **C** into a custom assembly (**GDasm**) that runs inside **Geometry Dash (GD)**.  
@@ -6,18 +6,39 @@ Pipeline: **C → x86 asm (GCC) → parse with ocamllex/menhir → translate to 
 
 ---
 
-## GD Runtime Model (Timing & Determinism)
-- GD runs at **240 ticks/sec**.
-- Each tick, a self-retriggering **Spawn loop** fans out a **fixed set of triggers** laid **left→right** for deterministic sub-tick order (you can emulate “240×M” effective sub-ticks per frame).
-- **One GDasm instruction per CPU tick**: each instruction expands to a **constant-size** micro-sequence of GD triggers and **finishes within that tick**.
-- **No trigger may spawn itself within the same tick** (no sub-tick back-edges).
+## Execution Model (ticks, spawn loop, CPU rate)
+
+### GD logic tick (engine)
+- GD’s engine updates at **240 Hz** (240 **GD logic ticks** per second).
+- You cannot insert work *between* these engine updates.
+
+### Main spawn loop (per GD tick)
+- A self-retriggering **main spawn loop** fires **once per GD logic tick**.
+- On each fire it **spawns N identical CPU-step spawns**; in your build **N = 500**.
+- You **do not offset** these spawns; they are permutation-invariant in your design (each does the same “next-instruction” step). Determinism still holds; order doesn’t affect final state within the frame.
+
+### CPU tick (a.k.a. subtick)
+- Each of the N spawns performs **one full CPU step**:
+  ```
+  PC := PC + 1
+  fetch instruction at PC
+  decode + execute
+  update flags / memory
+  commit result
+  ```
+- Effective CPU rate: **240 × 500 = 120,000 Hz (120 kHz)**.
+
+### What is / isn’t allowed **inside one CPU tick**
+- **No spawn-trigger loops** within the same GD logic tick (a trigger won’t re-fire again that frame).
+- **Everything else is allowed if fully unrolled**: bounded if/else gating, arithmetic chains, temporary storage, etc.  
+  Each GDasm instruction is a **bounded, unrolled microsequence** that **finishes within that CPU tick**.
 
 ---
 
 ## Control-Flow Rules
-- **Inside a tick (sub-tick window):** allow **if/else gating** (predicated paths), **no loops**.
-- **Across ticks (program level):** all **loops/branches** must be explicit in the program asm using **labels + `JMP`/`Jcc`**.  
-  The **PC** advances one instruction per tick (or jumps).
+- **Inside a CPU tick (subtick):** allow **bounded if/else** and feed-forward logic; **no spawn loops**.
+- **Across CPU ticks (program level):** all **loops/branches** are explicit in program asm using **labels + `JMP`/`Jcc`**.  
+  The **PC** advances one instruction per **CPU tick** (or jumps).
 
 ---
 
@@ -25,89 +46,103 @@ Pipeline: **C → x86 asm (GCC) → parse with ocamllex/menhir → translate to 
 1. Write **C** normally (loops, conditionals, drawing via helper calls).
 2. Compile to **x86 asm** (you never link/run the binary).
 3. Parse asm and map:
-   - already-implemented VM ops (`mov/add/sub/mul/and/or/xor/shl/shr/cmp/jmp/jnz/jne/...`) → **GDasm core ops**,
-   - **graphics/system calls** (declared below) → **GDasm device ops**,
+   - already-implemented VM ops (`mov/add/sub/mul/and/or/xor/shl/shr/cmp/jmp/jcc/...`) → **GDasm core ops**,
+   - **device calls** (declared below) → **GDasm device ops**,
    - `cmp/jcc/jmp` → **GDasm branches**.
 
-> We use **stub declarations** (no definitions) so GCC emits clean `call` sites that act as **semantic markers**.
+> We use **stub declarations** (no definitions) so GCC emits literal `call gd_*` sites that act as **semantic markers**.  
+> Register-passing attributes keep arguments parse-friendly.
 
 ---
 
-## Graphics / “System” Placeholders (Markers Only)
-These are **declarations** (no definitions). They exist only to make GCC emit `call gd_*` with args in registers (easy to parse).
+## Device / “System” Markers (current API — minimal; **will be completed later**)
 
-    #include <stdint.h>
+```c
+#include <stdint.h>
+#include <stdbool.h>
 
-    __attribute__((noinline, regparm(3))) void gd_setmode(uint32_t mode);
-    __attribute__((noinline, regparm(3))) void gd_putpixel(uint32_t x, uint32_t y, uint8_t c);
+/* Atomic drawing primitive: linearized pixel address */
+__attribute__((noinline, regparm(2)))
+void gd_putpixel_simplified(int32_t p, int32_t color);   // EAX=p, EDX=color
 
-    // Optional, only if you will implement them as constant-cost single-tick ops:
-    __attribute__((noinline, regparm(3))) void gd_setpalette(uint8_t idx, uint8_t r, uint8_t g);
-    __attribute__((noinline, regparm(3))) void gd_settarget(uint32_t id, uint32_t _, uint32_t __);
-    __attribute__((noinline, regparm(3))) void gd_swapbuffers(uint32_t which, uint32_t _, uint32_t __);
+/* Convenience wrapper: (x,y) → p = x + 80*y */
+void gd_putpixel(int32_t x, int32_t y, int32_t c){
+    gd_putpixel_simplified(x + 80 * y, c);               // 80 = screen width
+}
 
-- `noinline` ⇒ guarantees a literal `call` in asm.
-- `regparm(3)` ⇒ first 3 args in **EAX, EDX, ECX** (very parse-friendly).
+/* Input polling (atomic) */
+__attribute__((noinline)) bool gd_a_pressed();   
+__attribute__((noinline)) bool gd_w_pressed();  
+__attribute__((noinline)) bool gd_d_pressed();     
+__attribute__((noinline)) bool gd_left_pressed();
+__attribute__((noinline)) bool gd_up_pressed();   
+__attribute__((noinline)) bool gd_right_pressed();  
+
+/* RNG (atomic) */
+__attribute__((noinline, regparm(1)))
+int32_t gd_randint(int32_t max);                    // EAX=max, returns [0,max)
+
+__attribute__((noinline))
+void gd_waitnextframe();
+```
 
 ---
 
-## What You Implement Where
+## Tiering: What you implement where
 
-### Tier A — **In-game atomic primitives** (each = 1 instruction, constant sub-tick cost)
-- **Required:** `gd_putpixel(x,y,c)` — essential drawing primitive.
-- **Init/Context:** `gd_setmode(mode)` — one-time init or context switch.
-- **Optional:** `gd_setpalette`, `gd_settarget`, `gd_swapbuffers` — only if each can be done with a fixed, bounded sub-tick footprint.
+### Tier A — **In-game atomic primitives** (each = 1 CPU tick, constant cost)
+- **Drawing:** `gd_putpixel_simplified(p,color)` (linear address).
+- **Input:** the boolean `gd_*_pressed()` polls.
+- **Random:** `gd_randint(max)`.
+- **Timing:** `gd_waitnextframe()`.
 
-> All scalar ALU/branch ops (`mov/add/sub/.../cmp/jmp/jcc`) are already implemented in your VM and are **not** part of this list.
+> All scalar ALU/branch ops (`mov/add/sub/.../cmp/jmp/jcc`) are already implemented in your VM.
 
-### Tier B — **Compile-time helpers** (expand to program-level loops/branches using Tier A)
-No sub-tick loops. GCC emits `cmp/jcc/jmp` and many `call gd_putpixel`.
+### Tier B — **Compile-time helpers** (expand to program-level loops over Tier A)
+No sub-tick loops. GCC emits branches/labels and many pixel writes via the Tier-A primitive(s).
 
-- `gd_hline(x,y,len,c)` → loop `i=0..len-1`: `gd_putpixel(x+i, y, c)`
-- `gd_vline(x,y,len,c)` → loop `j=0..len-1`: `gd_putpixel(x, y+j, c)`
-- `gd_rect_outline(x,y,w,h,c)` → 2×hline + 2×vline
-- `gd_fillrect(x,y,w,h,c)` / `gd_clear_region(...)` → nested loops calling `gd_putpixel`
-- `gd_line(x0,y0,x1,y1,c)` → **Bresenham** loop
-- `gd_circle(cx,cy,r,c)` / `gd_fillcircle(...)` → midpoint algorithm loops
-- **Sprites/Bitmaps:**
-  - `gd_blit_mono(x,y,w,h,const uint8_t* bits,c)` (per-bit conditional putpixel)
-  - `gd_blit_indexed(x,y,w,h,const uint8_t* idx)` (per-texel putpixel)
-- **Text (bitmap font):** `gd_putglyph_8x8`, `gd_puts_8x8` (loops over bits/chars)
-- **Palette bulk:** `gd_use_palette(p)` → expands to many `gd_setpalette(...)` calls
+- Horizontal/vertical lines, rectangle outlines, filled rectangles/clears.
+- Bresenham line; circle and filled circle (midpoint algorithms).
+- Sprites/bitmaps: 1-bit mono blits and indexed blits.
+- Text via bitmap fonts (glyphs/strings).
 
-These helpers **create explicit asm control flow** (labels + `Jcc/JMP`) and many atomic `gd_putpixel` calls, executing over **multiple ticks** as needed.  
-Inside a single tick, only **bounded if/else gating** is allowed; **no loops**.
+*(Helper names are illustrative categories only; concrete function names are TBD and can be introduced later.)*
 
 ---
 
 ## Assembly Generation (for clean parsing)
 Compile with predictable flags:
 
-    gcc -m32 -O0 -fno-pic -fno-pie \
-        -fno-asynchronous-unwind-tables -fno-unwind-tables -fno-stack-protector \
-        -S -masm=intel your_code.c -o your_code.s
+```bash
+gcc -S your_code.c -m32 -fno-ident -fno-pic -fno-pie -fomit-frame-pointer -fcf-protection=none -fno-stack-protector -fno-unwind-tables -fno-asynchronous-unwind-tables -o your_code.s
 
-Expect patterns like:
+```
 
-    mov   <x expr>, eax
-    mov   <y expr>, edx
-    mov   <c expr>, ecx
-    call  gd_putpixel          ; → map to GDasm PUTPIXEL(EAX,EDX,ECX)
-
-    cmp   r?, r?
-    jcc   .Lx                  ; → map to GDasm conditional branch
-    jmp   .Ly                  ; → map to GDasm jump
+**Mapping summary (x86 → GDasm)**
+- `call gd_putpixel_simplified` → `PUTPIXEL(p=EAX, color=EDX)`
+- `call gd_*_pressed` → `READ_INPUT(kind) → EAX`
+- `call gd_randint` → `RAND(max=EAX) → EAX`
+- `call gd_waitnextframe` → **FRAME_WAIT** (block until next 240 Hz GD logic tick; then continue)
+- `cmp/jcc/jmp` → program-level control flow between instructions (across CPU ticks)
 
 ---
 
-## Notes on BIOS/graphics.h
-- You do **not** need `graphics.h` or real BIOS interrupts. We use `gd_*` **placeholders** as semantic markers in asm and implement behavior **inside GD**.
-- Real `int 10h, ah=00h` (set mode) would be used **once** in BIOS land; analog here is **one `gd_setmode` at init**, then draw via `gd_putpixel`.
+## Determinism & Ordering
+- Triggers in GD evaluate in a deterministic, consistent order inside a GD logic tick.
+- In your design, the **N CPU-step spawns are identical**, so the **order of those N subticks does not affect** final state within the frame (permutation-invariant).  
+  Determinism is preserved without left→right offsets.
+
+---
+
+## Notes
+- You do **not** need `graphics.h` or BIOS interrupts. We use `gd_*` **placeholders** purely to stamp semantic `call` sites in asm and implement behavior **inside GD**.
+- The **device API above is intentionally minimal and will be completed** as additional single-tick primitives are defined.
 
 ---
 
 ## Bottom Line
-- Every **GDasm instruction** has a **constant, bounded sub-tick footprint** and **finishes within one CPU tick**.  
-- **Loops/branches live in the program asm** (across ticks), never inside a sub-tick.  
-- Tier A = minimal **device ops** you implement in GD (e.g., `gd_putpixel`, `gd_setmode`).  
-- Tier B = higher-level drawing built by **program-level loops** that call Tier A many times.
+- Every **GDasm instruction** is a **bounded, unrolled microsequence** that completes in **one CPU tick** (one of your N spawns inside a GD logic tick).  
+- The **main spawn loop** at **240 Hz** emits **N = 500** identical CPU ticks per frame → **~120 kHz** effective CPU.  
+- **No spawn-trigger loops within a frame**; program-level loops/branches live in the asm (`JMP`/`Jcc`) **across CPU ticks**.  
+- Tier A = minimal atomic device ops listed above.  
+- Tier B = higher-level drawing/text built by compile-time expansion into many Tier-A calls over many CPU ticks.
