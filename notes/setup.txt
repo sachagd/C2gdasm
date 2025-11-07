@@ -5,15 +5,11 @@ trucs qui pourrait être fait :
     - pour enlever des appels de groupes sur les jumps, copier coller les triggers directement dans le code 
     - quand la src est un immediate, je voulais faire un truc mais je sais plus (lmao)
 
-
-mettre 9980 dans esp au tout début
-
-
 1 - 4001 : screen memory
 
+9973 : global timer
 9974 - 9979 : input buffer (q z d left up right)
-9980 : global timer
-9981 : temp mem -> vérfier qu'enlever 9982 ne pose pas de problème (avant c'était également dans temp mem)
+9980 - 9981 : temp mem -> vérfier qu'enlever 9982 ne pose pas de problème (avant c'était également dans temp mem, je crois que c'est bon)
 9982 : program counter
 9983 - 9990 : %eax, %ebx, %ecx, %edx, %esi, %edi, %ebp, %esp
 9991 : zero flag

@@ -4,7 +4,6 @@
 	leal	(%edx,%eax), %ecx
 	ret
 	jmp	.L3
-	pushl	52(%esp)
 	cmpl	40(%esp), %eax
 	jl	.L5
 	jne	.L9
@@ -12,14 +11,15 @@
 	js	.L21
 	jg	.L21
 	cltd
+	testl	%eax, %eax
+	nop
+	call	gd_putpixel_simplified
+	orl	$0, (%esp)
+	andl	$-16, %esp
+	pushl	52(%esp)
 	leave
 
 
-	orl	$0, (%esp)
-	andl	$-16, %esp
-	testl	%eax, %eax
 
 	sall	$2, %eax
-	nop
 	shrl	$23, %edx
-	call	gd_putpixel_simplified

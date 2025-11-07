@@ -57,25 +57,34 @@ gd_rect:
 	addl	$28, %esp
 	ret
 	.size	gd_rect, .-gd_rect
-	.type	on_snake, @function
-on_snake:
+	.type	on_snake_circ, @function
+on_snake_circ:
 	subl	$16, %esp
 	movl	$0, 12(%esp)
 	jmp	.L8
 .L11:
-	movl	12(%esp), %eax
+	movl	24(%esp), %eax
+	subl	12(%esp), %eax
+	addl	$512, %eax
+	cltd
+	shrl	$23, %edx
+	addl	%edx, %eax
+	andl	$511, %eax
+	subl	%edx, %eax
+	movl	%eax, 8(%esp)
+	movl	8(%esp), %eax
 	leal	0(,%eax,8), %edx
 	movl	20(%esp), %eax
 	addl	%edx, %eax
 	movl	(%eax), %eax
-	cmpl	%eax, 28(%esp)
+	cmpl	%eax, 32(%esp)
 	jne	.L9
-	movl	12(%esp), %eax
+	movl	8(%esp), %eax
 	leal	0(,%eax,8), %edx
 	movl	20(%esp), %eax
 	addl	%edx, %eax
 	movl	4(%eax), %eax
-	cmpl	%eax, 32(%esp)
+	cmpl	%eax, 36(%esp)
 	jne	.L9
 	movl	$1, %eax
 	jmp	.L10
@@ -83,35 +92,37 @@ on_snake:
 	addl	$1, 12(%esp)
 .L8:
 	movl	12(%esp), %eax
-	cmpl	24(%esp), %eax
+	cmpl	28(%esp), %eax
 	jl	.L11
 	movl	$0, %eax
 .L10:
 	addl	$16, %esp
 	ret
-	.size	on_snake, .-on_snake
+	.size	on_snake_circ, .-on_snake_circ
 	.type	spawn_apple, @function
 spawn_apple:
 	subl	$12, %esp
 .L13:
 	movl	$80, %eax
 	call	gd_randint
-	movl	24(%esp), %edx
+	movl	28(%esp), %edx
 	movl	%eax, (%edx)
 	movl	$50, %eax
 	call	gd_randint
-	movl	28(%esp), %edx
+	movl	32(%esp), %edx
 	movl	%eax, (%edx)
-	movl	28(%esp), %eax
+	movl	32(%esp), %eax
 	movl	(%eax), %edx
-	movl	24(%esp), %eax
+	movl	28(%esp), %eax
 	movl	(%eax), %eax
+	subl	$12, %esp
 	pushl	%edx
 	pushl	%eax
-	pushl	28(%esp)
-	pushl	28(%esp)
-	call	on_snake
-	addl	$16, %esp
+	pushl	44(%esp)
+	pushl	44(%esp)
+	pushl	44(%esp)
+	call	on_snake_circ
+	addl	$32, %esp
 	testl	%eax, %eax
 	jne	.L13
 	nop
@@ -141,15 +152,17 @@ main:
 	movl	$25, -4128(%ebp)
 	movl	$38, -4124(%ebp)
 	movl	$25, -4120(%ebp)
+	subl	$12, %esp
 	leal	-4148(%ebp), %eax
 	pushl	%eax
 	leal	-4144(%ebp), %eax
 	pushl	%eax
 	pushl	-16(%ebp)
+	pushl	-12(%ebp)
 	leal	-4140(%ebp), %eax
 	pushl	%eax
 	call	spawn_apple
-	addl	$16, %esp
+	addl	$32, %esp
 	movl	$0, -28(%ebp)
 	jmp	.L15
 .L16:
@@ -230,13 +243,15 @@ main:
 	js	.L21
 	cmpl	$49, -36(%ebp)
 	jg	.L21
+	subl	$12, %esp
 	pushl	-36(%ebp)
 	pushl	-32(%ebp)
 	pushl	-16(%ebp)
+	pushl	-12(%ebp)
 	leal	-4140(%ebp), %eax
 	pushl	%eax
-	call	on_snake
-	addl	$16, %esp
+	call	on_snake_circ
+	addl	$32, %esp
 	testl	%eax, %eax
 	jne	.L31
 	movl	-4144(%ebp), %eax
@@ -302,15 +317,17 @@ main:
 	addl	$16, %esp
 	cmpl	$0, -40(%ebp)
 	je	.L28
+	subl	$12, %esp
 	leal	-4148(%ebp), %eax
 	pushl	%eax
 	leal	-4144(%ebp), %eax
 	pushl	%eax
 	pushl	-16(%ebp)
+	pushl	-12(%ebp)
 	leal	-4140(%ebp), %eax
 	pushl	%eax
 	call	spawn_apple
-	addl	$16, %esp
+	addl	$32, %esp
 	movl	-4148(%ebp), %edx
 	movl	-4144(%ebp), %eax
 	subl	$4, %esp

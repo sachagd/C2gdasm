@@ -2,8 +2,10 @@ type argument =
   | Reg1 of string
   | Reg2 of string
   | Reg3 of int * string
-  | Reg4 of string * string * int
-  | Reg5 of int * string * string * int
+  | Reg4 of string * string
+  | Reg5 of int * string * int
+  | Reg6 of string * string * int
+  | Reg7 of int * string * string * int
   | Imm of int
   | Num of int
   | Str of string

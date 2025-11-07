@@ -12,18 +12,20 @@ typedef int32_t short32;
 
 typedef struct { i32 x, y; } Point;
 
-static bool32 on_snake(Point *snake, i32 len, i32 x, i32 y){
-    for (i32 i = 0; i < len; ++i)
-        if (snake[i].x == x && snake[i].y == y)
+static bool32 on_snake_circ(const Point *snake, i32 head, i32 len, i32 x, i32 y){
+    for (i32 k = 0; k < len; ++k){
+        i32 idx = (head - k + MAX_LEN) % MAX_LEN;
+        if (snake[idx].x == x && snake[idx].y == y)
             return 1;
+    }
     return 0;
 }
 
-static void spawn_apple(Point *snake, i32 len, i32 *apple_x, i32 *apple_y){
+static void spawn_apple(const Point *snake, i32 head, i32 len, i32 *apple_x, i32 *apple_y){
     do {
         *apple_x = gd_randint(WIDTH);
         *apple_y = gd_randint(HEIGHT);
-    } while (on_snake(snake, len, *apple_x, *apple_y));
+    } while (on_snake_circ(snake, head, len, *apple_x, *apple_y));
 }
 
 i32 main(){
@@ -40,7 +42,7 @@ i32 main(){
     snake[2].y = HEIGHT/2;
 
     i32 apple_x, apple_y;
-    spawn_apple(snake, len, &apple_x, &apple_y);
+    spawn_apple(snake, head, len, &apple_x, &apple_y);
 
     // draw initial body
     for (i32 i = 0; i < len; ++i)
@@ -58,7 +60,7 @@ i32 main(){
 
         if (new_x < 0 || new_x >= WIDTH || new_y < 0 || new_y >= HEIGHT)
             break;
-        if (on_snake(snake, len, new_x, new_y))
+        if (on_snake_circ(snake, head, len, new_x, new_y))
             break;
 
         bool32 ate = (new_x == apple_x && new_y == apple_y);
@@ -78,7 +80,7 @@ i32 main(){
         gd_putpixel(new_x, new_y, 0); // draw head
 
         if (ate) {
-            spawn_apple(snake, len, &apple_x, &apple_y);
+            spawn_apple(snake, head, len, &apple_x, &apple_y);
             gd_putpixel(apple_x, apple_y, 2);
         }
 

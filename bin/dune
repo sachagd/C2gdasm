@@ -2,4 +2,5 @@
  (name main)
  (modules main)
  (flags (:standard -w -32-26-11))
+ (promote (until-clean))
  (libraries ast lexer parser menhirLib yojson))

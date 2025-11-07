@@ -13,7 +13,7 @@ rule token = parse
   | not_separator+ ":" as f         { FUNCTION f } 
   | "%" not_separator+ as r         { REGISTER r }
   | "\"" ([^'"'])* "\"" as s        { STRING s }
-  | "$" digit+ as s                 { IMMEDIATE (int_of_string (String.sub s 1 (String.length s - 1))) }
+  | "$" ['-']? digit+ as s                 { IMMEDIATE (int_of_string (String.sub s 1 (String.length s - 1))) }
   | ['-']? ['0'-'9']+ as num        { NUMBER (int_of_string num) }
 
   | "addl"       { ADDL }
