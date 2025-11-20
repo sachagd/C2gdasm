@@ -1,9 +1,11 @@
 open Ast
 
+let firstinstrgroup = 299
+
 let rec finstructionf instructions acc =
   match instructions with 
   |[] -> acc
-  |(Cltd|Nop)::t -> finstructionf t acc
+  |(Nop)::t -> finstructionf t acc
   |_::t -> finstructionf t (acc + 1)
 
 let flabelf label_references program_counter label =
@@ -114,8 +116,6 @@ let sinstructionf code label_references is_main instruction =
     argumentf op insts 0;
     code := !insts::!code;
 
-  |Cltd -> ()
-
   |Notl(src, dst) -> twoarg_instruction src dst code insts 9
   |Orl(src, dst) -> twoarg_instruction src dst code insts 11
   |Andl(src, dst) -> twoarg_instruction src dst code insts 13
@@ -125,6 +125,8 @@ let sinstructionf code label_references is_main instruction =
 
   |Sall(Imm(count), dst) -> twoarg_instruction (Imm(power count 1)) dst code insts 20
   |Shrl(Imm(count), dst) -> twoarg_instruction (Imm(power count 1)) dst code insts 22
+
+  |Cltd -> code := [[|56|]]::!code (* changer le 56 plus tard*)
 
   |Movl(src, dst) -> twoarg_instruction src dst code insts 24
 
@@ -144,25 +146,25 @@ let sinstructionf code label_references is_main instruction =
     argumentf src insts 0;
     code := !insts::!code
 
-  |Jmp(target) -> code := [[|100; 9995; get_label target label_references|]; [|30|]]::!code;
+  |Jmp(target) -> code := [[|100; 9995; firstinstrgroup + get_label target label_references|]; [|30|]]::!code;
 
-  |Je(target) |Jz(target) -> code := [[|100; 9995; get_label target label_references|]; [|31|]]::!code;
-  |Jne(target) |Jnz(target) -> code := [[|100; 9995; get_label target label_references|]; [|32|]]::!code;
+  |Je(target) |Jz(target) -> code := [[|100; 9995; firstinstrgroup + get_label target label_references|]; [|31|]]::!code;
+  |Jne(target) |Jnz(target) -> code := [[|100; 9995; firstinstrgroup + get_label target label_references|]; [|32|]]::!code;
 
-  |Js(target) -> code := [[|100; 9995; get_label target label_references|]; [|33|]]::!code;
-  |Jns(target) -> code := [[|100; 9995; get_label target label_references|]; [|34|]]::!code;
+  |Js(target) -> code := [[|100; 9995; firstinstrgroup + get_label target label_references|]; [|33|]]::!code;
+  |Jns(target) -> code := [[|100; 9995; firstinstrgroup + get_label target label_references|]; [|34|]]::!code;
 
-  |Jo(target) -> code := [[|100; 9995; get_label target label_references|]; [|35|]]::!code;
-  |Jno(target) -> code := [[|100; 9995; get_label target label_references|]; [|36|]]::!code;
+  |Jo(target) -> code := [[|100; 9995; firstinstrgroup + get_label target label_references|]; [|35|]]::!code;
+  |Jno(target) -> code := [[|100; 9995; firstinstrgroup + get_label target label_references|]; [|36|]]::!code;
 
-  |Jc(target) -> code := [[|100; 9995; get_label target label_references|]; [|37|]]::!code;
-  |Jnc(target) -> code := [[|100; 9995; get_label target label_references|]; [|38|]]::!code;
+  |Jc(target) -> code := [[|100; 9995; firstinstrgroup + get_label target label_references|]; [|37|]]::!code;
+  |Jnc(target) -> code := [[|100; 9995; firstinstrgroup + get_label target label_references|]; [|38|]]::!code;
 
-  |Jge(target) |Jnl(target) -> code := [[|100; 9995; get_label target label_references|]; [|39|]]::!code;
-  |Jnge(target) |Jl(target) -> code := [[|100; 9995; get_label target label_references|]; [|40|]]::!code;
+  |Jge(target) |Jnl(target) -> code := [[|100; 9995; firstinstrgroup + get_label target label_references|]; [|39|]]::!code;
+  |Jnge(target) |Jl(target) -> code := [[|100; 9995; firstinstrgroup + get_label target label_references|]; [|40|]]::!code;
 
-  |Jle(target) |Jng(target) -> code := [[|100; 9995; get_label target label_references|]; [|41|]]::!code;
-  |Jnle(target) |Jg(target) -> code := [[|100; 9995; get_label target label_references|]; [|42|]]::!code;
+  |Jle(target) |Jng(target) -> code := [[|100; 9995; firstinstrgroup + get_label target label_references|]; [|41|]]::!code;
+  |Jnle(target) |Jg(target) -> code := [[|100; 9995; firstinstrgroup + get_label target label_references|]; [|42|]]::!code;
 
   |Ret -> if is_main then code := [[|43|]]::!code else code := [[|44|]]::!code
 
@@ -174,7 +176,7 @@ let sinstructionf code label_references is_main instruction =
     (match target with 
     |Id(label) -> 
       if Hashtbl.mem label_references label then 
-        code := [[|100; 9995; Hashtbl.find label_references label|]; [|46|]]::!code
+        code := [[|100; 9995; firstinstrgroup + Hashtbl.find label_references label|]; [|46|]]::!code
       else
         code := [[|47 + opcall label|]]::!code
     | _ -> failwith "invalid target")

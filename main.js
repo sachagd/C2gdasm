@@ -9,7 +9,6 @@ $.exportConfig({
     const instructions = JSON.parse(fs.readFileSync("code.json", "utf8"));
     const systeminfo = JSON.parse(fs.readFileSync("systeminfo.json", "utf8"));
     const firstinstrgroup = 300;
-    const mainloopgroup = 202;
     const n = instructions.length;
     if (n >= 9900) {
         // error code trop long
@@ -60,7 +59,8 @@ $.exportConfig({
                 TRIGGER_RED: palette[i][0],
                 TRIGGER_GREEN: palette[i][1],
                 TRIGGER_BLUE: palette[i][2],
-                HOLD: 0.01 * (systeminfo["ticks_par_frame"] + 1),
+                // HOLD: 0.01 * (systeminfo["ticks_par_frame"] + 1),
+                HOLD: 0.06,
                 TARGET_TYPE: true,
                 TARGET: group(4001),
                 SPAWN_TRIGGERED: true,
@@ -70,18 +70,6 @@ $.exportConfig({
         }
         for (let i = 0; i < n; i++){
             let p = instructions[i].length - 1;
-            $.add(object({
-                OBJ_ID: 1811,
-                X: 3345 + 30 * i,
-                Y: 135,
-                COUNT: i + 1,
-                TARGET: group(firstinstrgroup + i),
-                ITEM: 9982,
-                ACTIVATE_GROUP: true,
-                SPAWN_TRIGGERED: true,
-                MULTI_TRIGGER: true,
-                GROUPS: group(mainloopgroup),
-            }))
             for (let j = 0; j < p; j++){
                 let inst = instructions[i][j];
                 if (inst[0] == 100){
@@ -163,26 +151,7 @@ $.exportConfig({
                 MULTI_TRIGGER: true,
                 GROUPS: [group(firstinstrgroup + i), group(firstinstrgroup + n)],
             }))
-            $.add(object({
-                OBJ_ID: 1049,
-                X: 3345 + 2 * (p + 1) + 30 * i,
-                Y: 105 - 30 * (p + 1),
-                TARGET: group(200 + n),
-                SPAWN_TRIGGERED: true,
-                MULTI_TRIGGER: true,
-                GROUPS: [group(firstinstrgroup + i)],
-            }))
         }
-        $.add(object({
-            OBJ_ID: 1049,
-            X: 3345 + 2 * (p + 1) + 30 * i,
-            Y: 105 - 30 * (p + 1),
-            TARGET: group(firstinstrgroup + n),
-            ACTIVATE_GROUP: true,
-            SPAWN_TRIGGERED: true,
-            MULTI_TRIGGER: true,
-            GROUPS: [group(firstinstrgroup + i)],
-        }))
         // for (let i = 0; i < 20; i++){
         //     for (let j = 0; j < 20; j++){
         //           $.add(object({

@@ -81,3 +81,10 @@ si ~9K lignes de code ne suffit pas, avec 10 groupesID grâce au théorème de S
 
 on enlève les variantes ...w et ...b des opérations arithmetiques, j'ai aussi enlevé pour les bitwise op mais je sais plus pourquoi
 faire des optimisations pour des "test %eax %eax" -> ici on peut juste utiliser un instant count trigger "=0"
+
+https://www.raylib.com/cheatsheet/cheatsheet.html
+
+
+besoin de load input : add sub cmpl imull
+
+besoin de save output

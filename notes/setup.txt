@@ -7,6 +7,7 @@ trucs qui pourrait être fait :
 
 1 - 4001 : screen memory
 
+9972 : hardforce gd_waitnextframe
 9973 : global timer
 9974 - 9979 : input buffer (q z d left up right)
 9980 - 9981 : temp mem -> vérfier qu'enlever 9982 ne pose pas de problème (avant c'était également dans temp mem, je crois que c'est bon)
@@ -24,8 +25,8 @@ trucs qui pourrait être fait :
 
 pc specs : 
 
-cpu : 32 bits, 8 registers, 4 flags, 100KHz clock speed
-RAM : 40KB
+cpu : 32 bits, 8 registers, 4 flags, 200KHz clock speed
+RAM : 24KB
     
 groups :
     - 1 to 4001 : screen colors (en superposition avec le reste mais pas grave)

@@ -23,3 +23,105 @@
 
 	sall	$2, %eax
 	shrl	$23, %edx
+
+main:
+	leal	4(%esp), %ecx
+	andl	$-16, %esp
+	pushl	-4(%ecx)
+	pushl	%ebp
+	movl	%esp, %ebp
+	pushl	%ecx
+	subl	$4096, %esp
+	orl	    $0, (%esp)
+	subl	$52, %esp
+	movl	$2, -12(%ebp)
+	movl	$3, -16(%ebp)
+	movl	$1, -20(%ebp)
+	movl	$0, -24(%ebp)
+	movl	$40, -4140(%ebp)
+	movl	$25, -4136(%ebp)
+	movl	$39, -4132(%ebp)
+	movl	$25, -4128(%ebp)
+	movl	$38, -4124(%ebp)
+	movl	$25, -4120(%ebp)
+	subl	$12, %esp
+	leal	-4148(%ebp), %eax
+	pushl	%eax
+	leal	-4144(%ebp), %eax
+	pushl	%eax
+	pushl	-16(%ebp)
+	pushl	-12(%ebp)
+	leal	-4140(%ebp), %eax
+	pushl	%eax
+	call	spawn_apple
+
+	spawn_apple:
+	subl	$12, %esp
+.L13:
+	movl	$80, %eax
+	call	gd_randint
+	movl	28(%esp), %edx
+	movl	%eax, (%edx)
+	movl	$50, %eax
+	call	gd_randint
+	movl	32(%esp), %edx
+	movl	%eax, (%edx)
+	movl	32(%esp), %eax
+	movl	(%eax), %edx
+	movl	28(%esp), %eax
+	movl	(%eax), %eax
+	subl	$12, %esp
+	pushl	%edx
+	pushl	%eax
+	pushl	44(%esp)
+	pushl	44(%esp)
+	pushl	44(%esp)
+	call	on_snake_circ
+
+on_snake_circ:
+	subl	$16, %esp
+	movl	$0, 12(%esp)
+	jmp	.L8
+.L11:
+	movl	24(%esp), %eax
+	subl	12(%esp), %eax
+	addl	$512, %eax
+	cltd
+	shrl	$23, %edx
+	addl	%edx, %eax
+	andl	$511, %eax
+	subl	%edx, %eax
+	movl	%eax, 8(%esp)
+	movl	8(%esp), %eax
+	leal	0(,%eax,8), %edx
+	movl	20(%esp), %eax
+	addl	%edx, %eax
+	movl	(%eax), %eax
+	cmpl	%eax, 32(%esp)
+	jne	.L9
+	movl	8(%esp), %eax
+	leal	0(,%eax,8), %edx
+	movl	20(%esp), %eax
+	addl	%edx, %eax
+	movl	4(%eax), %eax
+	cmpl	%eax, 36(%esp)
+	jne	.L9
+	movl	$1, %eax
+	jmp	.L10
+.L9:
+	addl	$1, 12(%esp)
+.L8:
+	movl	12(%esp), %eax
+	cmpl	28(%esp), %eax
+	jl	.L11
+	movl	$0, %eax
+.L10:
+	addl	$16, %esp
+	ret
+	.size	on_snake_circ, .-on_snake_circ
+	.type	spawn_apple, @function
+
+
+
+
+ZF/SF : 1 2 3 4 5 6 11 12 13 14 15 16 17 20 21 22 23

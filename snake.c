@@ -34,11 +34,11 @@ i32 main(){
     i32 len = 3;
     i32 dx = 1, dy = 0;
 
-    snake[0].x = WIDTH/2;
+    snake[0].x = WIDTH/2 - 2;
     snake[0].y = HEIGHT/2;
     snake[1].x = WIDTH/2 - 1;
     snake[1].y = HEIGHT/2;
-    snake[2].x = WIDTH/2 - 2;
+    snake[2].x = WIDTH/2;
     snake[2].y = HEIGHT/2;
 
     i32 apple_x, apple_y;
@@ -46,12 +46,12 @@ i32 main(){
 
     // draw initial body
     for (i32 i = 0; i < len; ++i)
-        gd_putpixel(snake[i].x, snake[i].y, 0);
+        gd_putpixel(snake[i].x, snake[i].y, 1);
     gd_putpixel(apple_x, apple_y, 2);
 
     while (1) {
-        if (gd_up_pressed() && dy == 0) { dx = 0; dy = -1; }
-        else if (gd_w_pressed() && dy == 0) { dx = 0; dy = 1; }
+        if (gd_up_pressed() && dy == 0) { dx = 0; dy = 1; }
+        else if (gd_w_pressed() && dy == 0) { dx = 0; dy = -1; }
         else if (gd_left_pressed() && dx == 0) { dx = -1; dy = 0; }
         else if (gd_right_pressed() && dx == 0) { dx = 1; dy = 0; }
 
@@ -67,7 +67,7 @@ i32 main(){
 
         if (!ate) {
             i32 tail = (head - (len - 1) + MAX_LEN) % MAX_LEN;
-            gd_putpixel(snake[tail].x, snake[tail].y, 1); // erase tail
+            gd_putpixel(snake[tail].x, snake[tail].y, 0); // erase tail
         } else {
             if (len >= MAX_LEN)
                 break;
@@ -77,7 +77,7 @@ i32 main(){
         head = (head + 1) % MAX_LEN;
         snake[head].x = new_x;
         snake[head].y = new_y;
-        gd_putpixel(new_x, new_y, 0); // draw head
+        gd_putpixel(new_x, new_y, 1); // draw head
 
         if (ate) {
             spawn_apple(snake, head, len, &apple_x, &apple_y);

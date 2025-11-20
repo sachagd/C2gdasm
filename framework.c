@@ -1,5 +1,7 @@
 #include <stdint.h>
 
+#define BASE_COLOR_GROUP 205
+
 // subtick ops
 
 __attribute__((noinline, regparm(2))) void gd_putpixel_simplified(int32_t p, int32_t color);
@@ -18,7 +20,7 @@ __attribute__((noinline, regparm(1))) int32_t gd_randint(int32_t max);
 // ...
 
 void gd_putpixel(int32_t x, int32_t y, int32_t c){
-    gd_putpixel_simplified(x + 80 * y, c);
+    gd_putpixel_simplified(x + 80 * y, c + BASE_COLOR_GROUP);
 }  
 
 void gd_rect(int32_t x, int32_t y, int32_t w, int32_t h, int32_t c){

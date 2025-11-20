@@ -146,11 +146,11 @@ main:
 	movl	$3, -16(%ebp)
 	movl	$1, -20(%ebp)
 	movl	$0, -24(%ebp)
-	movl	$40, -4140(%ebp)
+	movl	$38, -4140(%ebp)
 	movl	$25, -4136(%ebp)
 	movl	$39, -4132(%ebp)
 	movl	$25, -4128(%ebp)
-	movl	$38, -4124(%ebp)
+	movl	$40, -4124(%ebp)
 	movl	$25, -4120(%ebp)
 	subl	$12, %esp
 	leal	-4148(%ebp), %eax
@@ -171,7 +171,7 @@ main:
 	movl	-28(%ebp), %eax
 	movl	-4140(%ebp,%eax,8), %eax
 	subl	$4, %esp
-	pushl	$0
+	pushl	$1
 	pushl	%edx
 	pushl	%eax
 	call	gd_putpixel
@@ -196,7 +196,7 @@ main:
 	cmpl	$0, -24(%ebp)
 	jne	.L17
 	movl	$0, -20(%ebp)
-	movl	$-1, -24(%ebp)
+	movl	$1, -24(%ebp)
 	jmp	.L18
 .L17:
 	call	gd_w_pressed
@@ -205,7 +205,7 @@ main:
 	cmpl	$0, -24(%ebp)
 	jne	.L19
 	movl	$0, -20(%ebp)
-	movl	$1, -24(%ebp)
+	movl	$-1, -24(%ebp)
 	jmp	.L18
 .L19:
 	call	gd_left_pressed
@@ -284,7 +284,7 @@ main:
 	movl	-44(%ebp), %eax
 	movl	-4140(%ebp,%eax,8), %eax
 	subl	$4, %esp
-	pushl	$1
+	pushl	$0
 	pushl	%edx
 	pushl	%eax
 	call	gd_putpixel
@@ -310,7 +310,7 @@ main:
 	movl	-36(%ebp), %edx
 	movl	%edx, -4136(%ebp,%eax,8)
 	subl	$4, %esp
-	pushl	$0
+	pushl	$1
 	pushl	-36(%ebp)
 	pushl	-32(%ebp)
 	call	gd_putpixel
