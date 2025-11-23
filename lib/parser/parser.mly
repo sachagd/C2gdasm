@@ -2,8 +2,6 @@
   open Ast
 %}
 
-%token <string> DIRECTIVE 
-%token <string> STRING
 %token <string> LABEL 
 %token <string> REGISTER 
 %token <int> IMMEDIATE
@@ -92,23 +90,7 @@ instruction:
   | LEAVE                         { Leave }
   | NOP               { Nop }
 
-dirarg:
-  | IDENT { Id($1) }
-  | STRING { Str($1) }
-  | NUMBER { Num($1) }
-
-dirargs:
-  | dirarg COMMA dirargs { $1 :: $3 }
-  | dirarg dirargs { $1 :: $2 }
-  | dirarg { [$1] }
-  | { [] }
-
-directives:
-  | DIRECTIVE dirargs directives { Dir($1, $2) :: $3 }
-  | DIRECTIVE dirargs { [Dir($1, $2)] }
-
 instructions:
-  | directives instructions { $2 }
   | instruction instructions { $1 :: $2 } 
   | instruction { [$1] }
   | { [] }
@@ -129,4 +111,4 @@ functions:
   | func { [$1] }
 
 program:
-  | directives functions EOF { Program $2 }
+  | functions EOF { Program $1 }

@@ -1,4 +1,6 @@
-gcc -S test.c -m32 -fno-ident -fno-pic -fno-pie -fomit-frame-pointer -fcf-protection=none -fno-stack-protector -fno-unwind-tables -fno-asynchronous-unwind-tables -o test.s
+gcc -S snake.c -O0 -m32 -fno-ident -fno-pic -fno-pie -fno-omit-frame-pointer -fcf-protection=none -fno-stack-protector -fno-unwind-tables -fno-asynchronous-unwind-tables -o snake.s
+
+-O0 : aucune optimisation
 
 -S : compile vers de l'assembleur
 
@@ -8,9 +10,9 @@ gcc -S test.c -m32 -fno-ident -fno-pic -fno-pie -fomit-frame-pointer -fcf-protec
 
 -fno-pie -fno-pic : enlève l'utilisation de la GLOBAL_OFFSET_TABLE
 
--fno-stack-protector : enlève la sécurité sur les overflow de buffer. Nécessaire pour que -fno-frame-pointer prenne effet 
+-fno-stack-protector : enlève la sécurité sur les overflow de buffer. Nécessaire pour que -fnomit-frame-pointer prenne effet 
 
--fnomit-frame-pointer : enlève l'utilisation de %ebp
+-fno-omit-frame-pointer : force l'utilisation de %ebp
 
 -fcf-protection=none : enlève endbr32 et endbr64 (instructions de contrôle)
 

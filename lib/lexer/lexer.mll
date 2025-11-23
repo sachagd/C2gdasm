@@ -7,14 +7,19 @@ let not_separator = [^' ' '\t' '\n' ',' '(' ')']
 let digit = ['0'-'9']
 
 rule token = parse
-  | [' ' '\t' '\r' '\n']+           { token lexbuf }
-  | "." (['a'-'z' '_'])+ as d       { DIRECTIVE d }
-  | "." not_separator+ ":" as l     { LABEL l }
-  | not_separator+ ":" as f         { FUNCTION f } 
-  | "%" not_separator+ as r         { REGISTER r }
-  | "\"" ([^'"'])* "\"" as s        { STRING s }
-  | "$" ['-']? digit+ as s                 { IMMEDIATE (int_of_string (String.sub s 1 (String.length s - 1))) }
-  | ['-']? ['0'-'9']+ as num        { NUMBER (int_of_string num) }
+  | [' ' '\t' '\r' '\n']+          { token lexbuf }
+  | '#' [^ '\n']* '\n'             { token lexbuf }
+  | ".file" [^ '\n']* '\n'        { token lexbuf }
+  | ".text" [^ '\n']* '\n'        { token lexbuf }
+  | ".globl" [^ '\n']* '\n'       { token lexbuf }
+  | ".type" [^ '\n']* '\n'        { token lexbuf }
+  | ".size" [^ '\n']* '\n'        { token lexbuf }
+  | ".section" [^ '\n']* '\n'     { token lexbuf }
+  | ".note.GNU-stack" [^ '\n']* '\n' { token lexbuf }
+  | not_separator+ ":" as s        { if s.[0] = '.' then LABEL s else FUNCTION s}
+  | "%" not_separator+ as r        { REGISTER r }
+  | "$" ['-']? digit+ as s         { IMMEDIATE (int_of_string (String.sub s 1 (String.length s - 1))) }
+  | ['-']? ['0'-'9']+ as num       { NUMBER (int_of_string num) }
 
   | "addl"       { ADDL }
   | "subl"       { SUBL }

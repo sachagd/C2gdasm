@@ -78,7 +78,7 @@ let get_label target label_references =
 
 let opcall op =
   match op with
-  |"gd_putpixel_simplified" -> 0
+  |"gd_draw_pixel_simplified" -> 0
   |"gd_a_pressed" -> 1
   |"gd_w_pressed" -> 2
   |"gd_d_pressed" -> 3

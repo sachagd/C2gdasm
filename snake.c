@@ -1,4 +1,6 @@
 #include <stdint.h>
+#define GD_DRAW_TEXT
+#define GD_DRAW_PIXEL
 #include "framework.c"
 
 typedef int32_t i32;
@@ -29,6 +31,7 @@ static void spawn_apple(const Point *snake, i32 head, i32 len, i32 *apple_x, i32
 }
 
 i32 main(){
+    gd_font_stack_init();
     Point snake[MAX_LEN];
     i32 head = 2;
     i32 len = 3;
@@ -46,8 +49,8 @@ i32 main(){
 
     // draw initial body
     for (i32 i = 0; i < len; ++i)
-        gd_putpixel(snake[i].x, snake[i].y, 1);
-    gd_putpixel(apple_x, apple_y, 2);
+        gd_draw_pixel(snake[i].x, snake[i].y, 1);
+    gd_draw_pixel(apple_x, apple_y, 2);
 
     while (1) {
         if (gd_up_pressed() && dy == 0) { dx = 0; dy = 1; }
@@ -66,8 +69,9 @@ i32 main(){
         bool32 ate = (new_x == apple_x && new_y == apple_y);
 
         if (!ate) {
-            i32 tail = (head - (len - 1) + MAX_LEN) % MAX_LEN;
-            gd_putpixel(snake[tail].x, snake[tail].y, 0); // erase tail
+            i32 temp = len - 1;
+            i32 tail = (head - temp + MAX_LEN) % MAX_LEN;
+            gd_draw_pixel(snake[tail].x, snake[tail].y, 0); // erase tail
         } else {
             if (len >= MAX_LEN)
                 break;
@@ -77,11 +81,11 @@ i32 main(){
         head = (head + 1) % MAX_LEN;
         snake[head].x = new_x;
         snake[head].y = new_y;
-        gd_putpixel(new_x, new_y, 1); // draw head
+        gd_draw_pixel(new_x, new_y, 1); // draw head
 
         if (ate) {
             spawn_apple(snake, head, len, &apple_x, &apple_y);
-            gd_putpixel(apple_x, apple_y, 2);
+            gd_draw_pixel(apple_x, apple_y, 2);
         }
 
         gd_waitnextframe();

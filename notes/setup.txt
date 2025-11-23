@@ -49,5 +49,3 @@ carry flag :
 102 : pickup trigger, ajoute une constante -> [|102, iid d'écriture, constante|]
 103 : item edit trigger, ajoute la valeur stockée dans un iid -> [|103, iid d'écriture, iid de lecture|]
 104 : pickup trigger, multiplie par une constante -> [|104, iid d'écriture, constante|]
-
-1,3619,2,735,3,165,57,62,155,2,62,1,87,1,36,1,80,9982,476,1,478,1,51,9990,479,1,481,1,482,3,241,0,242,0,243,1;

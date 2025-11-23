@@ -1,133 +1,200 @@
 	.file	"snake.c"
 	.text
-	.globl	gd_putpixel
-	.type	gd_putpixel, @function
-gd_putpixel:
-	subl	$12, %esp
-	movl	20(%esp), %edx
+	.globl	gd_draw_text
+	.type	gd_draw_text, @function
+gd_draw_text:
+	pushl	%ebp
+	movl	%esp, %ebp
+	subl	$72, %esp
+#APP
+# 38 "framework.c" 1
+	movl %esi, %edx
+movl %edi, %eax
+
+# 0 "" 2
+#NO_APP
+	movl	%edx, -24(%ebp)
+	movl	%eax, -28(%ebp)
+	movl	-24(%ebp), %eax
+	movl	%eax, -32(%ebp)
+	movl	-28(%ebp), %eax
+	movl	%eax, -36(%ebp)
+	movl	24(%ebp), %eax
+	addl	$205, %eax
+	movl	%eax, -40(%ebp)
+	movl	8(%ebp), %eax
+	movl	%eax, -12(%ebp)
+	movl	$0, -16(%ebp)
+	jmp	.L2
+.L5:
+	movl	-16(%ebp), %eax
+	leal	0(,%eax,4), %edx
+	movl	16(%ebp), %eax
+	addl	%edx, %eax
+	movl	(%eax), %eax
+	movl	%eax, -44(%ebp)
+	movl	-44(%ebp), %eax
+	leal	0(,%eax,8), %edx
+	movl	-32(%ebp), %eax
+	addl	%edx, %eax
+	movl	(%eax), %eax
+	movl	%eax, -48(%ebp)
+	movl	-44(%ebp), %eax
+	leal	0(,%eax,8), %edx
+	movl	-32(%ebp), %eax
+	addl	%edx, %eax
+	movl	4(%eax), %eax
+	movl	%eax, -52(%ebp)
+	movl	$0, -20(%ebp)
+	jmp	.L3
+.L4:
+	movl	-48(%ebp), %edx
+	movl	-20(%ebp), %eax
+	addl	%edx, %eax
+	leal	0(,%eax,8), %edx
+	movl	-36(%ebp), %eax
+	addl	%edx, %eax
+	movl	(%eax), %eax
+	movl	%eax, -56(%ebp)
+	movl	-48(%ebp), %edx
+	movl	-20(%ebp), %eax
+	addl	%edx, %eax
+	leal	0(,%eax,8), %edx
+	movl	-36(%ebp), %eax
+	addl	%edx, %eax
+	movl	4(%eax), %eax
+	movl	%eax, -60(%ebp)
+	movl	-12(%ebp), %edx
+	movl	-56(%ebp), %eax
+	leal	(%edx,%eax), %ecx
+	movl	12(%ebp), %edx
+	movl	-60(%ebp), %eax
+	addl	%eax, %edx
+	movl	%edx, %eax
+	sall	$2, %eax
+	addl	%edx, %eax
+	sall	$4, %eax
+	addl	%eax, %ecx
+	movl	-40(%ebp), %eax
+	movl	%eax, %edx
+	movl	%ecx, %eax
+	call	gd_draw_pixel_simplified
+	addl	$1, -20(%ebp)
+.L3:
+	movl	-20(%ebp), %eax
+	cmpl	-52(%ebp), %eax
+	jl	.L4
+	addl	$4, -12(%ebp)
+	addl	$1, -16(%ebp)
+.L2:
+	movl	-16(%ebp), %eax
+	cmpl	20(%ebp), %eax
+	jl	.L5
+	nop
+	nop
+	leave
+	ret
+	.size	gd_draw_text, .-gd_draw_text
+	.globl	gd_draw_pixel
+	.type	gd_draw_pixel, @function
+gd_draw_pixel:
+	pushl	%ebp
+	movl	%esp, %ebp
+	subl	$24, %esp
+	movl	16(%ebp), %eax
+	addl	$205, %eax
+	movl	%eax, -12(%ebp)
+	movl	12(%ebp), %edx
 	movl	%edx, %eax
 	sall	$2, %eax
 	addl	%edx, %eax
 	sall	$4, %eax
 	movl	%eax, %edx
-	movl	16(%esp), %eax
+	movl	8(%ebp), %eax
 	leal	(%edx,%eax), %ecx
-	movl	24(%esp), %eax
+	movl	-12(%ebp), %eax
 	movl	%eax, %edx
 	movl	%ecx, %eax
-	call	gd_putpixel_simplified
+	call	gd_draw_pixel_simplified
 	nop
-	addl	$12, %esp
+	leave
 	ret
-	.size	gd_putpixel, .-gd_putpixel
-	.globl	gd_rect
-	.type	gd_rect, @function
-gd_rect:
-	subl	$28, %esp
-	movl	$0, 12(%esp)
-	jmp	.L3
-.L6:
-	movl	$0, 8(%esp)
-	jmp	.L4
-.L5:
-	movl	36(%esp), %edx
-	movl	8(%esp), %eax
-	addl	%eax, %edx
-	movl	32(%esp), %ecx
-	movl	12(%esp), %eax
-	addl	%ecx, %eax
-	subl	$4, %esp
-	pushl	52(%esp)
-	pushl	%edx
-	pushl	%eax
-	call	gd_putpixel
-	addl	$16, %esp
-	addl	$1, 8(%esp)
-.L4:
-	movl	8(%esp), %eax
-	cmpl	40(%esp), %eax
-	jl	.L5
-	addl	$1, 12(%esp)
-.L3:
-	movl	12(%esp), %eax
-	cmpl	44(%esp), %eax
-	jl	.L6
-	nop
-	nop
-	addl	$28, %esp
-	ret
-	.size	gd_rect, .-gd_rect
+	.size	gd_draw_pixel, .-gd_draw_pixel
 	.type	on_snake_circ, @function
 on_snake_circ:
+	pushl	%ebp
+	movl	%esp, %ebp
 	subl	$16, %esp
-	movl	$0, 12(%esp)
+	movl	$0, -4(%ebp)
 	jmp	.L8
 .L11:
-	movl	24(%esp), %eax
-	subl	12(%esp), %eax
+	movl	12(%ebp), %eax
+	subl	-4(%ebp), %eax
 	addl	$512, %eax
 	cltd
 	shrl	$23, %edx
 	addl	%edx, %eax
 	andl	$511, %eax
 	subl	%edx, %eax
-	movl	%eax, 8(%esp)
-	movl	8(%esp), %eax
+	movl	%eax, -8(%ebp)
+	movl	-8(%ebp), %eax
 	leal	0(,%eax,8), %edx
-	movl	20(%esp), %eax
+	movl	8(%ebp), %eax
 	addl	%edx, %eax
 	movl	(%eax), %eax
-	cmpl	%eax, 32(%esp)
+	cmpl	%eax, 20(%ebp)
 	jne	.L9
-	movl	8(%esp), %eax
+	movl	-8(%ebp), %eax
 	leal	0(,%eax,8), %edx
-	movl	20(%esp), %eax
+	movl	8(%ebp), %eax
 	addl	%edx, %eax
 	movl	4(%eax), %eax
-	cmpl	%eax, 36(%esp)
+	cmpl	%eax, 24(%ebp)
 	jne	.L9
 	movl	$1, %eax
 	jmp	.L10
 .L9:
-	addl	$1, 12(%esp)
+	addl	$1, -4(%ebp)
 .L8:
-	movl	12(%esp), %eax
-	cmpl	28(%esp), %eax
+	movl	-4(%ebp), %eax
+	cmpl	16(%ebp), %eax
 	jl	.L11
 	movl	$0, %eax
 .L10:
-	addl	$16, %esp
+	leave
 	ret
 	.size	on_snake_circ, .-on_snake_circ
 	.type	spawn_apple, @function
 spawn_apple:
-	subl	$12, %esp
+	pushl	%ebp
+	movl	%esp, %ebp
+	subl	$8, %esp
 .L13:
 	movl	$80, %eax
 	call	gd_randint
-	movl	28(%esp), %edx
+	movl	20(%ebp), %edx
 	movl	%eax, (%edx)
 	movl	$50, %eax
 	call	gd_randint
-	movl	32(%esp), %edx
+	movl	24(%ebp), %edx
 	movl	%eax, (%edx)
-	movl	32(%esp), %eax
+	movl	24(%ebp), %eax
 	movl	(%eax), %edx
-	movl	28(%esp), %eax
+	movl	20(%ebp), %eax
 	movl	(%eax), %eax
 	subl	$12, %esp
 	pushl	%edx
 	pushl	%eax
-	pushl	44(%esp)
-	pushl	44(%esp)
-	pushl	44(%esp)
+	pushl	16(%ebp)
+	pushl	12(%ebp)
+	pushl	8(%ebp)
 	call	on_snake_circ
 	addl	$32, %esp
 	testl	%eax, %eax
 	jne	.L13
 	nop
 	nop
-	addl	$12, %esp
+	leave
 	ret
 	.size	spawn_apple, .-spawn_apple
 	.globl	main
@@ -142,24 +209,969 @@ main:
 	subl	$4096, %esp
 	orl	$0, (%esp)
 	subl	$52, %esp
+#APP
+# 34 "snake.c" 1
+	pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $9
+pushl $332
+pushl $7
+pushl $325
+pushl $9
+pushl $316
+pushl $12
+pushl $304
+pushl $9
+pushl $295
+pushl $11
+pushl $284
+pushl $7
+pushl $277
+pushl $7
+pushl $270
+pushl $10
+pushl $260
+pushl $7
+pushl $253
+pushl $8
+pushl $245
+pushl $8
+pushl $237
+pushl $13
+pushl $224
+pushl $12
+pushl $212
+pushl $7
+pushl $205
+pushl $9
+pushl $196
+pushl $6
+pushl $190
+pushl $9
+pushl $181
+pushl $11
+pushl $170
+pushl $9
+pushl $161
+pushl $9
+pushl $152
+pushl $11
+pushl $141
+pushl $10
+pushl $131
+pushl $7
+pushl $124
+pushl $10
+pushl $114
+pushl $10
+pushl $104
+pushl $0
+pushl $0
+pushl $6
+pushl $98
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $3
+pushl $95
+pushl $8
+pushl $87
+pushl $7
+pushl $80
+pushl $7
+pushl $73
+pushl $8
+pushl $65
+pushl $11
+pushl $54
+pushl $9
+pushl $45
+pushl $9
+pushl $36
+pushl $9
+pushl $27
+pushl $8
+pushl $19
+pushl $8
+pushl $11
+pushl $0
+pushl $0
+pushl $2
+pushl $9
+pushl $3
+pushl $6
+pushl $2
+pushl $4
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $4
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+pushl $0
+movl %esp, %esi
+pushl $3
+pushl $2
+pushl $3
+pushl $1
+pushl $3
+pushl $0
+pushl $2
+pushl $1
+pushl $1
+pushl $2
+pushl $0
+pushl $2
+pushl $0
+pushl $1
+pushl $0
+pushl $0
+pushl $0
+pushl $2
+pushl $0
+pushl $0
+pushl $4
+pushl $1
+pushl $3
+pushl $1
+pushl $2
+pushl $1
+pushl $1
+pushl $2
+pushl $1
+pushl $0
+pushl $0
+pushl $2
+pushl $0
+pushl $0
+pushl $4
+pushl $2
+pushl $4
+pushl $0
+pushl $3
+pushl $2
+pushl $3
+pushl $0
+pushl $2
+pushl $1
+pushl $1
+pushl $2
+pushl $1
+pushl $0
+pushl $0
+pushl $2
+pushl $0
+pushl $1
+pushl $0
+pushl $0
+pushl $4
+pushl $2
+pushl $4
+pushl $1
+pushl $4
+pushl $0
+pushl $3
+pushl $2
+pushl $3
+pushl $0
+pushl $2
+pushl $2
+pushl $2
+pushl $0
+pushl $1
+pushl $2
+pushl $1
+pushl $0
+pushl $0
+pushl $1
+pushl $4
+pushl $1
+pushl $3
+pushl $2
+pushl $3
+pushl $1
+pushl $2
+pushl $0
+pushl $1
+pushl $2
+pushl $1
+pushl $0
+pushl $0
+pushl $2
+pushl $0
+pushl $0
+pushl $4
+pushl $2
+pushl $4
+pushl $1
+pushl $4
+pushl $0
+pushl $3
+pushl $2
+pushl $3
+pushl $0
+pushl $2
+pushl $2
+pushl $2
+pushl $0
+pushl $1
+pushl $2
+pushl $1
+pushl $0
+pushl $0
+pushl $2
+pushl $0
+pushl $0
+pushl $2
+pushl $1
+pushl $1
+pushl $1
+pushl $0
+pushl $2
+pushl $0
+pushl $1
+pushl $0
+pushl $0
+pushl $4
+pushl $1
+pushl $3
+pushl $1
+pushl $2
+pushl $1
+pushl $1
+pushl $1
+pushl $1
+pushl $0
+pushl $0
+pushl $1
+pushl $4
+pushl $2
+pushl $4
+pushl $1
+pushl $3
+pushl $2
+pushl $2
+pushl $2
+pushl $2
+pushl $0
+pushl $1
+pushl $2
+pushl $1
+pushl $0
+pushl $0
+pushl $2
+pushl $0
+pushl $1
+pushl $0
+pushl $0
+pushl $4
+pushl $1
+pushl $3
+pushl $1
+pushl $2
+pushl $1
+pushl $2
+pushl $1
+pushl $1
+pushl $2
+pushl $1
+pushl $0
+pushl $0
+pushl $2
+pushl $0
+pushl $0
+pushl $4
+pushl $2
+pushl $3
+pushl $2
+pushl $2
+pushl $2
+pushl $2
+pushl $1
+pushl $2
+pushl $0
+pushl $1
+pushl $2
+pushl $1
+pushl $0
+pushl $0
+pushl $2
+pushl $0
+pushl $1
+pushl $0
+pushl $0
+pushl $4
+pushl $1
+pushl $3
+pushl $1
+pushl $2
+pushl $2
+pushl $2
+pushl $0
+pushl $1
+pushl $2
+pushl $1
+pushl $0
+pushl $0
+pushl $2
+pushl $0
+pushl $0
+pushl $1
+pushl $1
+pushl $3
+pushl $1
+pushl $4
+pushl $2
+pushl $4
+pushl $0
+pushl $3
+pushl $2
+pushl $3
+pushl $0
+pushl $2
+pushl $2
+pushl $2
+pushl $0
+pushl $1
+pushl $2
+pushl $1
+pushl $0
+pushl $0
+pushl $2
+pushl $0
+pushl $1
+pushl $0
+pushl $0
+pushl $4
+pushl $2
+pushl $4
+pushl $1
+pushl $4
+pushl $0
+pushl $3
+pushl $2
+pushl $3
+pushl $0
+pushl $2
+pushl $2
+pushl $2
+pushl $0
+pushl $1
+pushl $2
+pushl $1
+pushl $0
+pushl $0
+pushl $2
+pushl $0
+pushl $1
+pushl $0
+pushl $0
+pushl $4
+pushl $2
+pushl $4
+pushl $1
+pushl $4
+pushl $0
+pushl $3
+pushl $0
+pushl $2
+pushl $0
+pushl $1
+pushl $0
+pushl $0
+pushl $0
+pushl $3
+pushl $2
+pushl $3
+pushl $0
+pushl $2
+pushl $2
+pushl $2
+pushl $1
+pushl $2
+pushl $0
+pushl $1
+pushl $2
+pushl $1
+pushl $0
+pushl $0
+pushl $2
+pushl $0
+pushl $0
+pushl $4
+pushl $0
+pushl $3
+pushl $1
+pushl $2
+pushl $1
+pushl $1
+pushl $1
+pushl $0
+pushl $2
+pushl $0
+pushl $1
+pushl $0
+pushl $0
+pushl $4
+pushl $1
+pushl $3
+pushl $1
+pushl $2
+pushl $1
+pushl $1
+pushl $2
+pushl $1
+pushl $1
+pushl $1
+pushl $0
+pushl $0
+pushl $2
+pushl $0
+pushl $0
+pushl $4
+pushl $2
+pushl $4
+pushl $0
+pushl $3
+pushl $2
+pushl $3
+pushl $0
+pushl $2
+pushl $2
+pushl $2
+pushl $0
+pushl $1
+pushl $2
+pushl $1
+pushl $0
+pushl $0
+pushl $2
+pushl $0
+pushl $1
+pushl $0
+pushl $0
+pushl $4
+pushl $1
+pushl $3
+pushl $1
+pushl $2
+pushl $1
+pushl $1
+pushl $1
+pushl $1
+pushl $0
+pushl $0
+pushl $1
+pushl $4
+pushl $2
+pushl $4
+pushl $1
+pushl $3
+pushl $2
+pushl $2
+pushl $2
+pushl $2
+pushl $1
+pushl $2
+pushl $0
+pushl $1
+pushl $1
+pushl $0
+pushl $2
+pushl $0
+pushl $1
+pushl $0
+pushl $0
+pushl $4
+pushl $0
+pushl $3
+pushl $0
+pushl $2
+pushl $2
+pushl $2
+pushl $1
+pushl $2
+pushl $0
+pushl $4
+pushl $2
+pushl $4
+pushl $1
+pushl $4
+pushl $0
+pushl $3
+pushl $0
+pushl $2
+pushl $0
+pushl $1
+pushl $0
+pushl $0
+pushl $2
+pushl $0
+pushl $1
+pushl $0
+pushl $0
+pushl $4
+pushl $2
+pushl $4
+pushl $1
+pushl $3
+pushl $0
+pushl $2
+pushl $2
+pushl $2
+pushl $0
+pushl $1
+pushl $2
+pushl $1
+pushl $0
+pushl $0
+pushl $2
+pushl $0
+pushl $1
+pushl $0
+pushl $0
+pushl $4
+pushl $2
+pushl $4
+pushl $1
+pushl $3
+pushl $0
+pushl $2
+pushl $0
+pushl $1
+pushl $0
+pushl $0
+pushl $2
+pushl $0
+pushl $1
+pushl $0
+pushl $0
+pushl $4
+pushl $2
+pushl $4
+pushl $1
+pushl $3
+pushl $2
+pushl $3
+pushl $0
+pushl $2
+pushl $2
+pushl $2
+pushl $0
+pushl $1
+pushl $2
+pushl $1
+pushl $0
+pushl $0
+pushl $2
+pushl $0
+pushl $1
+pushl $0
+pushl $0
+pushl $4
+pushl $1
+pushl $3
+pushl $2
+pushl $3
+pushl $0
+pushl $2
+pushl $2
+pushl $2
+pushl $0
+pushl $1
+pushl $2
+pushl $1
+pushl $0
+pushl $0
+pushl $1
+pushl $4
+pushl $2
+pushl $4
+pushl $1
+pushl $4
+pushl $0
+pushl $3
+pushl $1
+pushl $2
+pushl $1
+pushl $1
+pushl $1
+pushl $0
+pushl $2
+pushl $0
+pushl $0
+pushl $4
+pushl $1
+pushl $3
+pushl $1
+pushl $2
+pushl $1
+pushl $1
+pushl $1
+pushl $1
+pushl $0
+pushl $0
+pushl $1
+pushl $4
+pushl $2
+pushl $4
+pushl $1
+pushl $3
+pushl $2
+pushl $2
+pushl $2
+pushl $2
+pushl $0
+pushl $1
+pushl $2
+pushl $1
+pushl $0
+pushl $0
+pushl $2
+pushl $0
+pushl $1
+pushl $0
+pushl $0
+pushl $4
+pushl $1
+pushl $3
+pushl $1
+pushl $2
+pushl $1
+pushl $1
+pushl $2
+pushl $0
+pushl $2
+pushl $0
+pushl $1
+pushl $0
+pushl $0
+pushl $4
+pushl $0
+pushl $3
+pushl $0
+pushl $2
+pushl $2
+pushl $2
+pushl $1
+pushl $2
+pushl $0
+pushl $1
+pushl $0
+pushl $0
+pushl $2
+pushl $0
+pushl $1
+pushl $4
+pushl $2
+pushl $4
+pushl $1
+pushl $3
+pushl $0
+pushl $2
+pushl $2
+pushl $2
+pushl $0
+pushl $1
+pushl $2
+pushl $1
+pushl $1
+pushl $1
+pushl $0
+pushl $0
+pushl $2
+pushl $0
+pushl $1
+pushl $0
+pushl $0
+pushl $3
+pushl $2
+pushl $3
+pushl $0
+pushl $2
+pushl $2
+pushl $2
+pushl $0
+pushl $1
+pushl $2
+pushl $1
+pushl $0
+pushl $0
+pushl $2
+pushl $0
+pushl $1
+pushl $0
+pushl $0
+pushl $4
+pushl $2
+pushl $4
+pushl $1
+pushl $4
+pushl $0
+pushl $3
+pushl $0
+pushl $2
+pushl $1
+pushl $1
+pushl $2
+pushl $0
+pushl $2
+pushl $0
+pushl $1
+pushl $0
+pushl $0
+pushl $2
+pushl $1
+pushl $4
+pushl $2
+pushl $4
+pushl $1
+pushl $4
+pushl $0
+pushl $3
+pushl $0
+pushl $2
+pushl $0
+pushl $1
+pushl $0
+pushl $0
+pushl $2
+pushl $0
+pushl $0
+pushl $4
+pushl $2
+pushl $4
+pushl $1
+pushl $4
+pushl $0
+pushl $3
+pushl $1
+pushl $2
+pushl $1
+pushl $1
+pushl $1
+pushl $1
+pushl $0
+pushl $0
+pushl $1
+pushl $4
+pushl $1
+pushl $3
+pushl $2
+pushl $3
+pushl $0
+pushl $2
+pushl $2
+pushl $2
+pushl $0
+pushl $1
+pushl $2
+pushl $1
+pushl $0
+pushl $0
+pushl $1
+pushl $4
+pushl $1
+pushl $3
+pushl $1
+pushl $2
+pushl $2
+pushl $2
+pushl $1
+pushl $2
+pushl $0
+pushl $4
+pushl $1
+pushl $3
+pushl $1
+pushl $4
+pushl $1
+pushl $2
+pushl $1
+pushl $1
+pushl $1
+pushl $0
+pushl $1
+movl %esp, %edi
+
+# 0 "" 2
+#NO_APP
 	movl	$2, -12(%ebp)
 	movl	$3, -16(%ebp)
 	movl	$1, -20(%ebp)
 	movl	$0, -24(%ebp)
-	movl	$38, -4140(%ebp)
-	movl	$25, -4136(%ebp)
-	movl	$39, -4132(%ebp)
-	movl	$25, -4128(%ebp)
-	movl	$40, -4124(%ebp)
-	movl	$25, -4120(%ebp)
+	movl	$38, -4144(%ebp)
+	movl	$25, -4140(%ebp)
+	movl	$39, -4136(%ebp)
+	movl	$25, -4132(%ebp)
+	movl	$40, -4128(%ebp)
+	movl	$25, -4124(%ebp)
 	subl	$12, %esp
-	leal	-4148(%ebp), %eax
+	leal	-4152(%ebp), %eax
 	pushl	%eax
-	leal	-4144(%ebp), %eax
+	leal	-4148(%ebp), %eax
 	pushl	%eax
 	pushl	-16(%ebp)
 	pushl	-12(%ebp)
-	leal	-4140(%ebp), %eax
+	leal	-4144(%ebp), %eax
 	pushl	%eax
 	call	spawn_apple
 	addl	$32, %esp
@@ -167,27 +1179,27 @@ main:
 	jmp	.L15
 .L16:
 	movl	-28(%ebp), %eax
-	movl	-4136(%ebp,%eax,8), %edx
+	movl	-4140(%ebp,%eax,8), %edx
 	movl	-28(%ebp), %eax
-	movl	-4140(%ebp,%eax,8), %eax
+	movl	-4144(%ebp,%eax,8), %eax
 	subl	$4, %esp
 	pushl	$1
 	pushl	%edx
 	pushl	%eax
-	call	gd_putpixel
+	call	gd_draw_pixel
 	addl	$16, %esp
 	addl	$1, -28(%ebp)
 .L15:
 	movl	-28(%ebp), %eax
 	cmpl	-16(%ebp), %eax
 	jl	.L16
-	movl	-4148(%ebp), %edx
-	movl	-4144(%ebp), %eax
+	movl	-4152(%ebp), %edx
+	movl	-4148(%ebp), %eax
 	subl	$4, %esp
 	pushl	$2
 	pushl	%edx
 	pushl	%eax
-	call	gd_putpixel
+	call	gd_draw_pixel
 	addl	$16, %esp
 .L29:
 	call	gd_up_pressed
@@ -226,12 +1238,12 @@ main:
 	movl	$0, -24(%ebp)
 .L18:
 	movl	-12(%ebp), %eax
-	movl	-4140(%ebp,%eax,8), %edx
+	movl	-4144(%ebp,%eax,8), %edx
 	movl	-20(%ebp), %eax
 	addl	%edx, %eax
 	movl	%eax, -32(%ebp)
 	movl	-12(%ebp), %eax
-	movl	-4136(%ebp,%eax,8), %edx
+	movl	-4140(%ebp,%eax,8), %edx
 	movl	-24(%ebp), %eax
 	addl	%edx, %eax
 	movl	%eax, -36(%ebp)
@@ -248,16 +1260,16 @@ main:
 	pushl	-32(%ebp)
 	pushl	-16(%ebp)
 	pushl	-12(%ebp)
-	leal	-4140(%ebp), %eax
+	leal	-4144(%ebp), %eax
 	pushl	%eax
 	call	on_snake_circ
 	addl	$32, %esp
 	testl	%eax, %eax
 	jne	.L31
-	movl	-4144(%ebp), %eax
+	movl	-4148(%ebp), %eax
 	cmpl	%eax, -32(%ebp)
 	jne	.L23
-	movl	-4148(%ebp), %eax
+	movl	-4152(%ebp), %eax
 	cmpl	%eax, -36(%ebp)
 	jne	.L23
 	movl	$1, %eax
@@ -269,25 +1281,26 @@ main:
 	cmpl	$0, -40(%ebp)
 	jne	.L25
 	movl	-16(%ebp), %eax
-	leal	-1(%eax), %edx
+	subl	$1, %eax
+	movl	%eax, -44(%ebp)
 	movl	-12(%ebp), %eax
-	subl	%edx, %eax
+	subl	-44(%ebp), %eax
 	addl	$512, %eax
 	cltd
 	shrl	$23, %edx
 	addl	%edx, %eax
 	andl	$511, %eax
 	subl	%edx, %eax
-	movl	%eax, -44(%ebp)
-	movl	-44(%ebp), %eax
-	movl	-4136(%ebp,%eax,8), %edx
-	movl	-44(%ebp), %eax
-	movl	-4140(%ebp,%eax,8), %eax
+	movl	%eax, -48(%ebp)
+	movl	-48(%ebp), %eax
+	movl	-4140(%ebp,%eax,8), %edx
+	movl	-48(%ebp), %eax
+	movl	-4144(%ebp,%eax,8), %eax
 	subl	$4, %esp
 	pushl	$0
 	pushl	%edx
 	pushl	%eax
-	call	gd_putpixel
+	call	gd_draw_pixel
 	addl	$16, %esp
 	jmp	.L26
 .L25:
@@ -305,36 +1318,36 @@ main:
 	movl	%eax, -12(%ebp)
 	movl	-12(%ebp), %eax
 	movl	-32(%ebp), %edx
-	movl	%edx, -4140(%ebp,%eax,8)
+	movl	%edx, -4144(%ebp,%eax,8)
 	movl	-12(%ebp), %eax
 	movl	-36(%ebp), %edx
-	movl	%edx, -4136(%ebp,%eax,8)
+	movl	%edx, -4140(%ebp,%eax,8)
 	subl	$4, %esp
 	pushl	$1
 	pushl	-36(%ebp)
 	pushl	-32(%ebp)
-	call	gd_putpixel
+	call	gd_draw_pixel
 	addl	$16, %esp
 	cmpl	$0, -40(%ebp)
 	je	.L28
 	subl	$12, %esp
-	leal	-4148(%ebp), %eax
+	leal	-4152(%ebp), %eax
 	pushl	%eax
-	leal	-4144(%ebp), %eax
+	leal	-4148(%ebp), %eax
 	pushl	%eax
 	pushl	-16(%ebp)
 	pushl	-12(%ebp)
-	leal	-4140(%ebp), %eax
+	leal	-4144(%ebp), %eax
 	pushl	%eax
 	call	spawn_apple
 	addl	$32, %esp
-	movl	-4148(%ebp), %edx
-	movl	-4144(%ebp), %eax
+	movl	-4152(%ebp), %edx
+	movl	-4148(%ebp), %eax
 	subl	$4, %esp
 	pushl	$2
 	pushl	%edx
 	pushl	%eax
-	call	gd_putpixel
+	call	gd_draw_pixel
 	addl	$16, %esp
 .L28:
 	call	gd_waitnextframe

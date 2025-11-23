@@ -96,7 +96,7 @@ void gd_waitnextframe();
 - **Random:** `gd_randint(max)`.
 - **Timing:** `gd_waitnextframe()`.
 
-> All scalar ALU/branch ops (`mov/add/sub/.../cmp/jmp/jcc`) are already implemented in your VM.
+> All scalar ALU/branch ops (`mov/add/sub/.../cmp/jmp/jcc`) are already implemented in your VM. At the C/x86 level, the Tier-A `gd_*` functions above are **declarations only** (no C bodies, never linked or implemented in C). Their sole purpose is to make GCC emit literal `call gd_*` instructions that the transpiler will reinterpret as device ops; the real semantics of these calls live entirely inside the GDasm VM/runtime, not in any C code.
 
 ### Tier B — **Compile-time helpers** (expand to program-level loops over Tier A)
 No sub-tick loops. GCC emits branches/labels and many pixel writes via the Tier-A primitive(s).

@@ -41,20 +41,8 @@ $.exportConfig({
         const palette = systeminfo["palette"];
         for (let i = 0; i < palette.length; i++){
             $.add(object({
-                OBJ_ID: 1811,
-                X: 705,
-                Y: 1095 + 30 * i,
-                COUNT: i,
-                TARGET: group(205 + i),
-                ITEM: 4001,
-                ACTIVATE_GROUP: true,
-                SPAWN_TRIGGERED: true,
-                MULTI_TRIGGER: true,
-                GROUPS: group(204),
-            }))
-            $.add(object({
                 OBJ_ID: 1006,
-                X: 735,
+                X: 705,
                 Y: 1095 + 30 * i,
                 TRIGGER_RED: palette[i][0],
                 TRIGGER_GREEN: palette[i][1],
