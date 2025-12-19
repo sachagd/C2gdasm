@@ -31,12 +31,21 @@ static void spawn_apple(const Point *snake, i32 head, i32 len, i32 *apple_x, i32
 }
 
 i32 main(){
-    gd_font_stack_init();
+    gd_font_init();
+
+    int32_t hello_world[] = {
+    7, 4, 11, 11, 14,
+    22, 14, 17, 11, 3
+    };
+    gd_draw_text(10, 10, hello_world, 10, 1);
+
+
+
     Point snake[MAX_LEN];
     i32 head = 2;
     i32 len = 3;
     i32 dx = 1, dy = 0;
-
+    
     snake[0].x = WIDTH/2 - 2;
     snake[0].y = HEIGHT/2;
     snake[1].x = WIDTH/2 - 1;

@@ -78,13 +78,14 @@ pour les divisions, utiliser l'item edit trigger
 les overflow pour la multiplication sont à proscrire
 
 si ~9K lignes de code ne suffit pas, avec 10 groupesID grâce au théorème de Sperner, on peut créer 184756 sous ensemble de combinaisons de groupeID deux à deux distincts
+opti : analyser l'asm, quand il n'y a pas de jump, alors on sait que c'est deux instruction consécutives, alors on peut réduire le nombre de toggle trigger utilisé (ne pas toggle ou untoggle un groupe respectivement déjà toggle ou untoggle )
+
 
 on enlève les variantes ...w et ...b des opérations arithmetiques, j'ai aussi enlevé pour les bitwise op mais je sais plus pourquoi
 faire des optimisations pour des "test %eax %eax" -> ici on peut juste utiliser un instant count trigger "=0"
 
 https://www.raylib.com/cheatsheet/cheatsheet.html
 
+ah oui faut faire gaffe, avec l'asm imbriqué, ça peut poser des problèmes avec la gestion de esp et ebp, peut être pas mais faut faire gaffe, je crois que c'est pour cela que j'ai décidé d'utiliser -fno-omit-frame-pointer 
 
-besoin de load input : add sub cmpl imull
-
-besoin de save output
+enlever les loads d'inputs et créer deux sets de trigger pour chaque instructions pour chaque cas à la place  

@@ -5,6 +5,7 @@
 // subtick ops
 
 __attribute__((noinline, regparm(2))) void gd_draw_pixel_simplified(int32_t p, int32_t color);
+__attribute__((noinline, regparm(1))) int32_t gd_get_pixel_simplified(int32_t p);
 
 __attribute__((noinline)) int32_t gd_a_pressed();
 __attribute__((noinline)) int32_t gd_w_pressed();
@@ -19,11 +20,18 @@ __attribute__((noinline, regparm(1))) int32_t gd_randint(int32_t max);
 
 // ...
 
+#ifdef GD_GET_PIXEL
+int32_t gd_get_pixel(int32_t x, int32_t y){
+    return gd_get_pixel_simplified(x + 80 * y);
+} 
+#endif
+
+
 #ifdef GD_DRAW_TEXT
 #include "gd_font_meta.inc"
 #include "gd_font_points.inc"
 
-#define gd_font_stack_init();                             \
+#define gd_font_init();                             \
     __asm__ __volatile__(                                 \
         GD_FONT_META_PUSHES                               \
         "movl %esp, %esi\n"                               \
@@ -63,6 +71,7 @@ void gd_draw_text(int32_t x, int32_t y, int32_t *s, int32_t len, int32_t c){
 }
 #endif 
 
+
 #ifdef GD_DRAW_PIXEL
 void gd_draw_pixel(int32_t x, int32_t y, int32_t c){
     int32_t color = c + BASE_COLOR_GROUP;
@@ -70,23 +79,26 @@ void gd_draw_pixel(int32_t x, int32_t y, int32_t c){
 } 
 #endif
 
+
 #ifdef GD_DRAW_RECT
 void gd_draw_rect(int32_t x, int32_t y, int32_t w, int32_t h, int32_t c){
     int32_t color = c + BASE_COLOR_GROUP;
-    for (int i = 0; i < h; i++){
-        for (int j = 0; j < w; j++){
+    for (int i = 0; i < w; i++){
+        for (int j = 0; j < h; j++){
             gd_draw_pixel_simplified(x + i + 80 * (y + j), color);
         }
     }
 }
 #endif
 
-// __attribute__((noinline, regparm(3))) void gd_setmode(int32_t mode);
-// __attribute__((noinline, regparm(3))) void gd_setviewport(int32_t x, int32_t y, int32_t wh);
-// __attribute__((noinline, regparm(3))) void gd_setorigin(int32_t ox, int32_t oy, int32_t _); 
-// __attribute__((noinline, regparm(3))) void gd_setpalb(int32_t idx, int32_t b, int32_t _);
-// __attribute__((noinline, regparm(3))) void gd_settarget(int32_t id, int32_t _, int32_t __); 
-// __attribute__((noinline, regparm(3))) void gd_swapbuffers(int32_t which, int32_t _, int32_t __);
-// __attribute__((noinline, regparm(3))) int32_t gd_getpixel(int32_t x, int32_t y, int32_t _);
-// __attribute__((noinline)) int sys_pollkeys();
 
+#ifdef GD_DRAW_SCREEN
+void gd_draw_screen(int32_t c){
+    int32_t color = c + BASE_COLOR_GROUP;
+    for (int i = 0; i < 80; i++){
+        for (int j = 0; j < 50; j++){
+            gd_draw_pixel_simplified(i + 80 * j, color);
+        }
+    }
+}
+#endif

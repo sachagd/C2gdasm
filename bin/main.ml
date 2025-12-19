@@ -87,13 +87,10 @@ let opcall op =
   |"gd_right_pressed" -> 6
   |"gd_waitnextframe" -> 7
   |"gd_randint" -> 8
+  |"gd_get_pixel" -> 10
   |"malloc" -> 100
   |"free" -> 101
   |_ -> failwith "invalid function call"
-
-let rec power n acc =
-  if n = 0 then acc
-  else power (n - 1) (acc * 2)
 
 let sinstructionf code label_references is_main instruction = 
   let insts = ref [] in 
@@ -123,8 +120,9 @@ let sinstructionf code label_references is_main instruction =
   |Testl(op1, op2) -> twoarg_instruction op1 op2 code insts 16
   |Xorl(src, dst)  -> twoarg_instruction src dst code insts 18
 
-  |Sall(Imm(count), dst) -> twoarg_instruction (Imm(power count 1)) dst code insts 20
-  |Shrl(Imm(count), dst) -> twoarg_instruction (Imm(power count 1)) dst code insts 22
+  |Sall(Imm(count), dst) -> twoarg_instruction (Imm(1 lsl count )) dst code insts 20
+  (* ici le premier argument est forcément un immédiat donc faut pas utiliser twoarg_instruction, garder les opcode pour les deux autres *)
+  |Shrl(Imm(count), dst) -> twoarg_instruction (Imm(1 lsl count )) dst code insts 22
 
   |Cltd -> code := [[|56|]]::!code (* changer le 56 plus tard*)
 
@@ -317,11 +315,12 @@ let print_program prog =
 
 
 let () =
-  let filename = "snake.s" in
+  let filename = "code.s" in
   let channel = open_in filename in
   let lexbuf = Lexing.from_channel channel in
   let ast = Parser.program Lexer.token lexbuf in
   close_in channel;
+  print_program ast;
   let label_references = fprogramf ast in
   Hashtbl.iter (fun s i -> print_string s; print_string " "; print_int i; print_newline ()) label_references;
   let code = List.rev (sprogramf ast label_references) in

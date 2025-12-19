@@ -76,7 +76,7 @@ rule token = parse
   | "call"       { CALL }
   | "ret"        { RET }
   | "leave"      { LEAVE }
-  | "nop"        { NOP }
+  | "nop"        { token lexbuf }
 
   | ","                             { COMMA }
   | "("                             { LPAREN }

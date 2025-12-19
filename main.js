@@ -10,8 +10,11 @@ $.exportConfig({
     const systeminfo = JSON.parse(fs.readFileSync("systeminfo.json", "utf8"));
     const firstinstrgroup = 300;
     const n = instructions.length;
-    if (n >= 9900) {
+    if  (n > 184756){
         // error code trop long
+    }
+    else if (n >= 9900) {
+        // seulement dans ce cas faire la strat avec des toggle triggers
     }
     else{
         const keybinds = systeminfo["keybinds"];
