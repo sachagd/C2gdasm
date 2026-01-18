@@ -16,7 +16,7 @@ rule token = parse
   | ".size" [^ '\n']* '\n'        { token lexbuf }
   | ".section" [^ '\n']* '\n'     { token lexbuf }
   | ".note.GNU-stack" [^ '\n']* '\n' { token lexbuf }
-  | not_separator+ ":" as s        { if s.[0] = '.' then LABEL s else FUNCTION s}
+  | not_separator+ ":" as s        { if s.[0] = '.' then (Printf.printf "%s\n" s; LABEL s) else FUNCTION s}
   | "%" not_separator+ as r        { REGISTER r }
   | "$" ['-']? digit+ as s         { IMMEDIATE (int_of_string (String.sub s 1 (String.length s - 1))) }
   | ['-']? ['0'-'9']+ as num       { NUMBER (int_of_string num) }
@@ -43,6 +43,8 @@ rule token = parse
   | "xorw"       { XORW }
   | "xorl"       { XORL }
   | "sall"       { SALL }
+  | "sarl"       { SARL }
+  | "shll"       { SHLL }
   | "shrl"       { SHRL }
   | "movb"       { MOVB }
   | "movw"       { MOVW }

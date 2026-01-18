@@ -9,7 +9,7 @@
 %token <string> IDENT
 %token <string> FUNCTION
 %token ADDL SUBL CMPL CLTD IMULL IDIVL
-%token NOTB NOTW NOTL ORB ORW ORL ANDB ANDW ANDL TESTB TESTW TESTL XORB XORW XORL SALL SHRL
+%token NOTB NOTW NOTL ORB ORW ORL ANDB ANDW ANDL TESTB TESTW TESTL XORB XORW XORL SALL SARL SHLL SHRL
 %token MOVB MOVW MOVL PUSHB PUSHW PUSHL POPB POPW POPL LEAL
 %token JMP JE JZ JNE JNZ JS JNS JO JNO JC JNC JGE JNL JNGE JL JLE JNG JNLE JG
 %token CALL RET LEAVE NOP
@@ -55,7 +55,13 @@ instruction:
   | XORW argument COMMA argument  { Xorw($2, $4) }
   | XORL argument COMMA argument  { Xorl($2, $4) }
   | SALL argument COMMA argument  { Sall($2, $4) }
+  | SALL argument { Sall(Imm(1), $2) }
+  | SARL argument COMMA argument  { Sarl($2, $4) }
+  | SARL argument  { Sarl(Imm(1), $2) }
+  | SHLL argument COMMA argument  { Shll($2, $4) }
+  | SHLL argument  { Shll(Imm(1), $2) }
   | SHRL argument COMMA argument  { Shrl($2, $4) }
+  | SHRL argument   { Shrl(Imm(1), $2) }
   | MOVB argument COMMA argument   { Movb($2, $4) }
   | MOVW argument COMMA argument   { Movw($2, $4) }
   | MOVL argument COMMA argument   { Movl($2, $4) }

@@ -34,6 +34,8 @@ type instruction =
   | Xorw of argument * argument
   | Xorl of argument * argument
   | Sall of argument * argument
+  | Sarl of argument * argument
+  | Shll of argument * argument
   | Shrl of argument * argument
   | Movb of argument * argument
   | Movw of argument * argument

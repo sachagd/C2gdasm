@@ -120,9 +120,25 @@ let sinstructionf code label_references is_main instruction =
   |Testl(op1, op2) -> twoarg_instruction op1 op2 code insts 16
   |Xorl(src, dst)  -> twoarg_instruction src dst code insts 18
 
-  |Sall(Imm(count), dst) -> twoarg_instruction (Imm(1 lsl count )) dst code insts 20
-  (* ici le premier argument est forcément un immédiat donc faut pas utiliser twoarg_instruction, garder les opcode pour les deux autres *)
-  |Shrl(Imm(count), dst) -> twoarg_instruction (Imm(1 lsl count )) dst code insts 22
+  |Sall(Imm(count), dst) |Shll(Imm(count), dst) ->
+    insts := [|20|]::!insts;
+    argumentf dst insts 2;
+    insts := [|100; 9995; count|]::!insts;
+    code := !insts::!code
+
+  |Sarl(Imm(count), dst) ->
+    insts := [|21|]::!insts;
+    argumentf dst insts 2;
+    insts := [|100; 9995; if count > 0 && count < 31 then 1 lsl count else failwith "invalid bitshift value"|]::!insts;
+    code := !insts::!code
+
+  |Shrl(Imm(count), dst) -> 
+    insts := [|22|]::!insts;
+    argumentf dst insts 2;
+    insts := [|100; 9995; if count > 0 && count < 31 then 1 lsl count else failwith "invalid bitshift value"|]::!insts;
+    code := !insts::!code
+  
+  (*  opcode 23 plus utilisé *)
 
   |Cltd -> code := [[|56|]]::!code (* changer le 56 plus tard*)
 
@@ -179,7 +195,7 @@ let sinstructionf code label_references is_main instruction =
         code := [[|47 + opcall label|]]::!code
     | _ -> failwith "invalid target")
 
-  | _ -> failwith "invalid instruction in si"
+  | _ -> failwith "invalid instruction in isa"
 
 let slabelf label_references code is_main label =
   match label with
@@ -259,6 +275,8 @@ let string_of_instruction = function
   | Xorw(a,b) -> sprintf "Xorw(%s, %s)" (string_of_argument a) (string_of_argument b)
   | Xorl(a,b) -> sprintf "Xorl(%s, %s)" (string_of_argument a) (string_of_argument b)
   | Sall(a,b) -> sprintf "Sall(%s, %s)" (string_of_argument a) (string_of_argument b)
+  | Sarl(a,b) -> sprintf "Sarl(%s, %s)" (string_of_argument a) (string_of_argument b)
+  | Shll(a,b) -> sprintf "Shll(%s, %s)" (string_of_argument a) (string_of_argument b)
   | Shrl(a,b) -> sprintf "Shrl(%s, %s)" (string_of_argument a) (string_of_argument b)
   | Movb(a,b) -> sprintf "Movb(%s, %s)" (string_of_argument a) (string_of_argument b)
   | Movw(a,b) -> sprintf "Movw(%s, %s)" (string_of_argument a) (string_of_argument b)

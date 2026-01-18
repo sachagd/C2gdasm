@@ -1,0 +1,4 @@
+pour la division par le pickup trigger : 
+    - entre -2^23 et 2^23 c'est arrondi vers le plus proche puis après c'est arrondi vers 0 (en fait c'est un conséquence directe de l'imprécision sur les flottants)
+
+max extra groups used for instructions so far : 132 (use next one)

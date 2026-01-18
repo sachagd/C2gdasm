@@ -74,7 +74,7 @@ après une instruction set, il y aura en principe nécessairement un movzbl. Il 
 -> checker toutes les variantes de set
 
 multiplication et division ne touchent pas à CF et OF (en principe non mais en pratique ça change rien)
-pour les divisions, utiliser l'item edit trigger 
+pour les divisions, utiliser l'item edit trigger (je crois que c'est à cause de vers où se fait l'arrondi, il y avait un pb avec le pickup trigger je crois)
 les overflow pour la multiplication sont à proscrire
 
 si ~9K lignes de code ne suffit pas, avec 10 groupesID grâce au théorème de Sperner, on peut créer 184756 sous ensemble de combinaisons de groupeID deux à deux distincts
@@ -86,6 +86,8 @@ faire des optimisations pour des "test %eax %eax" -> ici on peut juste utiliser 
 
 https://www.raylib.com/cheatsheet/cheatsheet.html
 
-ah oui faut faire gaffe, avec l'asm imbriqué, ça peut poser des problèmes avec la gestion de esp et ebp, peut être pas mais faut faire gaffe, je crois que c'est pour cela que j'ai décidé d'utiliser -fno-omit-frame-pointer 
+ah oui faut faire gaffe, avec l'asm imbriqué, ça peut poser des problèmes avec la gestion de esp et ebp, peut être pas mais faut faire gaffe, 
+je crois que c'est pour cela que j'ai décidé d'utiliser -fno-omit-frame-pointer puis aussi faire gaffe parce que si esi et edi sont utilisés alors ça détruit tout, 
+dans ce cas utiliser deux items id spécifiquement pour cela
 
-enlever les loads d'inputs et créer deux sets de trigger pour chaque instructions pour chaque cas à la place  
+enlever les loads d'inputs et créer deux sets de trigger pour chaque instructions pour chaque cas à la place 
