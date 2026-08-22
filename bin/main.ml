@@ -1,4 +1,5 @@
 open Ast
+open Bigarray
 
 let firstinstrgroup = 299
 
@@ -47,9 +48,23 @@ let get_register reg =
   |"%esp" -> 9990
   | _ -> failwith "unknown register"
 
-let argumentf argument insts argoffset = 
+let imm_correction imm argoffset = (* triggers stores numbers using 32 bits float therefore some 32 bits signed integers cannot be represented *)
+  let base = 
+    (fun n -> let a = Array1.create float32 c_layout 1 in
+    a.{0} <- Int32.to_float n;
+    int_of_float a.{0}) (Int32.of_int imm) in 
+  let offset = imm - base in 
+  if base = 2147483648 then 
+    [|100; 9995 + argoffset; 2147483520 |]::[[|102; 9995 + argoffset; 128 + offset|]]
+  else 
+    if offset <> 0 then 
+      [|100; 9995 + argoffset; base |]::[[|102; 9995 + argoffset; offset|]]
+    else 
+      [[|100; 9995 + argoffset; base |]]
+
+let argumentf argument insts argoffset = (* sûrement moyen d'optimiser cela *)
   match argument with
-  |Imm(imm) -> insts := [|100; 9995 + argoffset; imm|]::!insts
+  |Imm(imm) -> insts := (imm_correction imm argoffset) @ !insts;
   |Reg1(reg) -> insts := [|100; 9995 + argoffset; get_register reg|]::!insts
   |Reg2(reg) -> insts := [|101; 9995 + argoffset; get_register reg|]::!insts
   |Reg3(offset, reg) -> insts := [|101; 9995 + argoffset; get_register reg|]::[|102; 9995 + argoffset; offset / 4|]::!insts
@@ -79,15 +94,15 @@ let get_label target label_references =
 let opcall op =
   match op with
   |"gd_draw_pixel_simplified" -> 0
-  |"gd_a_pressed" -> 1
-  |"gd_w_pressed" -> 2
-  |"gd_d_pressed" -> 3
-  |"gd_left_pressed" -> 4
-  |"gd_up_pressed" -> 5
-  |"gd_right_pressed" -> 6
-  |"gd_waitnextframe" -> 7
-  |"gd_randint" -> 8
-  |"gd_get_pixel" -> 10
+  |"gd_get_pixel" -> 1
+  |"gd_a_pressed" -> 2
+  |"gd_w_pressed" -> 3
+  |"gd_d_pressed" -> 4
+  |"gd_left_pressed" -> 5
+  |"gd_up_pressed" -> 6
+  |"gd_right_pressed" -> 7
+  |"gd_waitnextframe" -> 8
+  |"gd_randint" -> 9
   |"malloc" -> 100
   |"free" -> 101
   |_ -> failwith "invalid function call"
@@ -129,13 +144,13 @@ let sinstructionf code label_references is_main instruction =
   |Sarl(Imm(count), dst) ->
     insts := [|21|]::!insts;
     argumentf dst insts 2;
-    insts := [|100; 9995; if count > 0 && count < 31 then 1 lsl count else failwith "invalid bitshift value"|]::!insts;
+    insts := [|100; 9995; if count = 31 then -1 else 1 lsl count|]::!insts; (* iids cannot hold 2^31 *)
     code := !insts::!code
 
   |Shrl(Imm(count), dst) -> 
     insts := [|22|]::!insts;
     argumentf dst insts 2;
-    insts := [|100; 9995; if count > 0 && count < 31 then 1 lsl count else failwith "invalid bitshift value"|]::!insts;
+    insts := [|100; 9995; if count = 31 then -1 else 1 lsl count|]::!insts; (* iids cannot hold 2^31 *)
     code := !insts::!code
   
   (*  opcode 23 plus utilisé *)
@@ -190,9 +205,9 @@ let sinstructionf code label_references is_main instruction =
     (match target with 
     |Id(label) -> 
       if Hashtbl.mem label_references label then 
-        code := [[|100; 9995; firstinstrgroup + Hashtbl.find label_references label|]; [|46|]]::!code
+        code := [[|100; 9995; firstinstrgroup + Hashtbl.find label_references label|]; [|80|]]::!code
       else
-        code := [[|47 + opcall label|]]::!code
+        code := [[|81 + opcall label|]]::!code
     | _ -> failwith "invalid target")
 
   | _ -> failwith "invalid instruction in isa"
@@ -333,7 +348,7 @@ let print_program prog =
 
 
 let () =
-  let filename = "code.s" in
+  let filename = "verif.s" in
   let channel = open_in filename in
   let lexbuf = Lexing.from_channel channel in
   let ast = Parser.program Lexer.token lexbuf in

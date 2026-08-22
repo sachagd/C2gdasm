@@ -132,3 +132,61 @@ shrl <count>, <destination>
 
 
 Je pense que je peux regrouper certaines instructions ensemble mais je suis pas sûr. Il y a même moyen je peux juste ignorer certaines.
+
+
+wait : 
+
+if i9973 != 0 then //we want to wait 
+    i9972 = 1 //we register being in the waiting state
+    i9982 = i9982 - 1 //we wait
+else //we don't want to wait anymore
+    if i9972 = 0 then //we are already out of the waiting state meaning computation was very quick
+        i9982 = i9982 - 1 //we wait
+    i9972 = 0 //we are out of the waiting state
+
+sarl : 
+
+i9996 contains 2^shift if shift < 31 else -1 because iids cannot hold 2^31
+
+if i9996 == -1 then //if shift = 31
+    if i9998 < 0 then 
+        i9999 = -1 //a 31 bits signed right shift on a negative integer always equal -1
+    else 
+        i9999 = 0 //a 31 bits signed right shift on a positive integer always equal 0 
+else
+    i9999 = flr(i9998 / i9996) //perform regular signed right shift
+
+sall/shll : 
+
+toggle g124 //toggle all spawn trigger
+i9999 = i9998
+g124 () = //one shift
+    if i9996 > 0 then //if we still need to shift 
+        if abs(i9999 / 32768) <= 32768 then //if the shift won't cause an overflow
+            i9999 = i9999 + i9999 // do the shift
+        else 
+            i9999 = i9999 + -2147483648 //put the value back in the range where the shift won't cause an overflow
+            i9999 = i9999 + i9999 //do the shift, note that -2147483648 * 2 ≡ 0 [2^32] so the computation is correct
+        i9996 = i9996 + -1 //we did the shift
+    else //all shift done
+        untoggle g124 //untoggle all other spawn trigger
+
+shrl : 
+
+i9996 contains 2^shift if shift < 31 else -1 because iids cannot hold 2^31
+
+if i9996 != -1 then 
+    i9999 = flr(i9998 / i9996)
+    if i9998 < 0 then
+        if 9996 != 2 then 
+            i9998 = -2147482648
+            i9998 = flr(i9998 / i9996)
+            i9998 = i9998 * -2
+            i9999 = i9999 + i9998
+        else
+            i9999 = i9999 + -2147483648
+else //if shift = 31
+    if i9998 < 0 then 
+        i9999 = 1 //a 31 bits unsigned right shift on a negative integer always equal 1
+    else 
+        i9999 = 0 //a 31 bits unsigned right shift on a negative integer always equal 0

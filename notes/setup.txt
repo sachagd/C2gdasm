@@ -5,7 +5,7 @@ trucs qui pourrait être fait :
     - pour enlever des appels de groupes sur les jumps, copier coller les triggers directement dans le code 
     - quand la src est un immediate, je voulais faire un truc mais je sais plus (lmao)
 
-1 - 4001 : screen memory
+1 - 4001 : screen memory buffer
 
 9972 : hardforce gd_waitnextframe
 9973 : global timer

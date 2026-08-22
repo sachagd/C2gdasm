@@ -1,0 +1,149 @@
+C2gdasm — Project Primer
+
+Repo: https://github.com/sachagd/C2gdasm Companion mod (required, see below): https://github.com/sachagd/Pointers
+
+What this is
+
+A compiler + runtime that lets C code actually execute inside Geometry Dash (GD), a platformer game with a Turing-complete trigger/logic system. A hand-built GD level acts as a general-purpose computer — registers, flags, a stack, a memory-mapped screen, keyboard input — all implemented as GD trigger objects. The compiler turns ordinary C into a stream of GD trigger placements that, once loaded into the level, run as a real program when you press play.
+
+Because almost everything below only makes sense in terms of GD's trigger system, and that system is not really documented anywhere, read section 1 first.
+
+1. GD editor & trigger mechanics (read this first)
+
+A complete description of the editor exists here: https://www.robtopgames.com/files/GDEditor.pdf — but it's very general and misses most of the specific behavior that matters for this project (activation ordering, toggle semantics, etc.). What follows is only the relevant subset, plus a few things that aren't in that guide at all and had to be figured out experimentally.
+
+Triggers, generally. Triggers are objects placed in the editor that let you do things. Placing one draws a vertical line from the very top of the editor to the very bottom, through the trigger's center — visible only while editing, invisible during actual play. By default, a trigger activates once, when the player touches that vertical line while moving through the level. Each trigger has two mutually-exclusive alternate modes: touch trigger (activates when the player touches the trigger's own hitbox instead of the level-spanning line) or spawn trigger (can only be activated by another trigger, never directly by the player). If either of those two is enabled, a further option, multi activate, lets the trigger fire more than once instead of being consumed after its first activation.
+
+Group IDs. Any object can be tagged with up to 10 group IDs (1–9999). A trigger that targets group n activates every object tagged with group n. If several objects share a group, they activate left-to-right by X position in the editor; ties are broken by placement order (whichever was placed in the editor first fires first — not Y position). We'll usually just say "group," dropping "ID," and elsewhere in these notes an item ID may get shortened to "iid" the same way.
+
+Spawn Trigger. Activates the target group, optionally after a delay. Chains of triggers activating other triggers form a tree, and the overall firing order across that whole tree behaves roughly like a preorder traversal (combined with the left-to-right/placement-order rule above for anything sharing a group). Importantly, a group generally cannot be activated more than once within the same GD game tick — there are exceptions to this, but treat it as the default assumption. This is exactly why "no spawn-trigger loops within one CPU tick" is a hard rule for this project (see Execution model below): a loop that re-spawns a group it already fired earlier in the same tick simply won't re-fire.
+
+Toggle Trigger. Targets one group and toggles it on or off. All groups start toggled on by default. If an object is tagged with any group that's currently toggled off, the whole object becomes invisible and non-interactable — an untoggled trigger cannot be activated, touched, or spawned. Toggle state belongs to the group ID, not the object: if an object carries several groups and multiple of them are toggled off, every one of those groups has to be individually toggled back on before the object works again.
+
+Item IDs. Separately from groups, there are item IDs — 32-bit signed integers, numbered 1–9999 — used as the machine's actual storage/variables. Two trigger types read/write them:
+
+Pickup Trigger — the simple case: set, add, multiply, or divide an item ID by an explicit constant.
+Item Edit Trigger — richer arithmetic combining a couple of item IDs and constants, with add/subtract/multiply/divide plus absolute-value and negation. Examples of what it can express (I1 = "the value stored in item ID 1", etc.):
+I1 = Neg(I1 + Abs((I3 / I2) * 433.528))
+I4 = I4 - (I3 - I2) * 4.5
+I4 = (I3 + I3) * -2
+Since item IDs only hold integers, division results get rounded — and not always in the same direction, which is a real, known quirk worth remembering when debugging anything involving division.
+
+Testing item ID values (branching primitives).
+
+Instant Count Trigger — tests one item ID against an explicit constant with ==, >, or <. If the test passes, it can either untoggle a group, or toggle-and-spawn a group (that second mode both toggles the group on and spawns it — the untoggle mode does not spawn anything). If the test fails, nothing happens.
+Item Compare Trigger — a richer comparison between two item IDs, with one target group to spawn if the comparison is true and a different one to spawn if it's false. Unlike the Instant Count Trigger, both outcomes only ever spawn — there's no toggle option here.
+
+Terminology note. "To spawn" and "to activate" mean the same thing. So "spawning a group" is a general description of any trigger causing that group's objects to fire — an Instant Count Trigger's toggle-and-spawn pass-outcome, an Item Compare Trigger on either branch — not specifically the object literally named "Spawn Trigger," which is just one particular tool for doing this. (The Toggle Trigger is the odd one out: it only ever toggles a group on or off, and never spawns anything by itself.)
+
+2. The Pointers mod — why it exists
+
+Pickup Trigger and Item Edit Trigger, as described above, always operate on a compile-time-fixed item ID — the number is baked into the trigger object itself. That's a real problem for building a computer: things like movl (%eax), %ebx (read from the address currently stored in %eax, not from a fixed address) need genuine runtime pointer dereference, which vanilla GD cannot express directly.
+
+Pointers (https://github.com/sachagd/Pointers) is a small custom Geode mod that adds toggleable "treat this number as a pointer" bits to the relevant triggers: on the Item Edit Trigger, each operand item ID (and the target/write item ID) can be marked as a pointer, meaning "don't use this number directly — read the value currently stored there, and use that as the real item ID to read/write." The Spawn Trigger gets an analogous bit for its target group, enabling computed jump/call targets.
+
+This is treated as an optimization, not a hard requirement in principle: the same behavior is theoretically reproducible in vanilla GD via a giant if addr==1 then ... else if addr==2 then ... chain over every possible item ID — it's just wildly impractical at this scale. The mod exists to make dynamic addressing actually usable.
+
+3. System architecture — the three layers
+The "hardware" — a hand-built GD level, mostly fixed and reusable across programs. It defines: item IDs for registers/flags/PC/stack/screen buffer, a bank of low-numbered groups each implementing one opcode's generic execution logic, and the input/graphics subsystems. Written once, not regenerated per-program.
+The "code region" — a large reserved range of groups (starting at group 300) that the compiler fills in per-program: one group per compiled instruction, acting as a dispatch stub.
+The compiler — bin/main.ml (OCaml) parses x86 asm into an AST, then emits an IR: a JSON array of instructions, each itself an array of small integer-array "micro-ops" corresponding to Pickup/Item-Edit-trigger-style operations. main.js (using the G.js library) reads that IR plus systeminfo.json and places the actual GD trigger objects into a level save file. No further parsing happens in JS — the IR is deliberately just nested arrays.
+4. Execution model
+
+Fetch/dispatch is two-stage:
+
+PC (an item ID) holds the value of the currently executing instruction's actual GD group number at all times — not a separate 0-based index.
+Each CPU cycle, PC is incremented first, then group PC is spawned.
+That group is a per-instruction dispatch stub: a hardcoded chain of Pickup/Item-Edit triggers that load this specific instruction's operands into a small fixed set of "argument" item IDs, then spawns the shared opcode group for that instruction type.
+The opcode group (shared across the whole program, one per ISA operation) contains the actual ALU/branch/memory logic, updates flags, and writes results back.
+Because PC is incremented before dispatch, jump/call targets are compiled as (real destination group − 1), so that after the jump opcode sets PC and the loop's own PC += 1 runs, execution lands exactly on the intended group.
+
+Bounded branching within one dispatch is fine; loops are not. A single instruction's dispatch-stub-then-opcode-group cascade all happens within one GD game tick. Within that cascade you can have bounded/unrolled conditional gating (Instant Count Trigger, Item Compare Trigger), since that's just more groups being spawned once each — but you cannot loop back and re-spawn a group already fired earlier in the same cascade, because (per section 1) a group generally can't re-activate within the same game tick. All real loops/branches therefore live at the program level, across CPU ticks, via JMP/Jcc changing PC.
+
+Operand addressing: x86 addressing modes (disp(base,index,scale) etc.) can't be expressed as a single trigger, so the compiler decomposes each operand into a short sequence of Pickup/Item-Edit-style micro-ops that incrementally compute an effective address into a scratch item ID at compile time (dividing byte offsets/scales by 4, since the machine is word-addressed, not byte-addressed — registers like %esp/%ebp are consistently tracked in word units at runtime for this reason). Dynamic dereferencing of the resulting runtime address is where the Pointers mod comes in.
+
+Clock rate: there's no fixed CPU frequency by design — throughput scales with how many copies of the "step" trigger chain are placed, up to the point the game starts lagging. Specific Hz figures that may show up in older notes/docs are rough estimates from earlier iterations, not a spec.
+
+5. Memory layout
+
+Two entirely separate numbering systems matter here — group IDs and item IDs. Don't conflate them; a "group 100" and an "item ID 100" are unrelated things that happen to share a number.
+
+5a. Group ID layout
+Groups 0–100 — one shared group per opcode: the ISA's actual execution logic (ALU ops, branches, memory ops, device calls).
+Groups 100–150 — additional groups supporting opcode execution (e.g. flag computation subroutines shared by several opcodes). This range is currently the messiest part of the codebase and still mid-refactor.
+Groups 300+ — the code region: one dispatch-stub group per compiled instruction, in program order (current hard cap around 9900 instructions before hitting GD's group ID ceiling; a combinatorial group-reuse trick based on Sperner's theorem is a planned-but-low-priority fix for programs beyond that).
+5b. Item ID layout
+Item IDs 1–4000 — the screen buffer: one item ID per on-screen cell, holding a palette color-index (not a raw RGB value).
+Item IDs 9971–9999 — the fixed "top of memory" region: registers, flags, the input buffer, the argument-passing slots, and the result/output slot. This is the fixed interface every opcode group reads its operands from and writes its result to.
+Item IDs 9970 and below — the stack.
+
+(Exact sub-boundaries within these ranges — which specific item ID is which register, etc. — live in the actual source, not here; this document only tracks the structural regions.)
+
+6. Device intrinsics & tiering (Tier A / Tier B)
+
+C code talks to the "hardware" through a small set of stub function declarations — declared, never defined in C. Their only job is to make GCC emit a literal call gd_* instruction, which the parser recognizes as a device-intrinsic marker rather than a real function call; the actual behavior lives entirely in the GDasm runtime, not in any C code. Register-passing attributes (regparm) keep the calling convention parse-friendly so the compiler knows exactly which register holds which argument:
+
+c
+#include <stdint.h>
+#include <stdbool.h>
+
+/* Atomic drawing primitive: linearized pixel address */
+__attribute__((noinline, regparm(2)))
+void gd_putpixel_simplified(int32_t p, int32_t color);   // EAX=p, EDX=color
+
+/* Convenience wrapper: (x,y) → p = x + 80*y */
+void gd_putpixel(int32_t x, int32_t y, int32_t c){
+    gd_putpixel_simplified(x + 80 * y, c);               // 80 = screen width
+}
+
+/* Input polling (atomic) */
+__attribute__((noinline)) bool gd_a_pressed();
+__attribute__((noinline)) bool gd_w_pressed();
+__attribute__((noinline)) bool gd_d_pressed();
+__attribute__((noinline)) bool gd_left_pressed();
+__attribute__((noinline)) bool gd_up_pressed();
+__attribute__((noinline)) bool gd_right_pressed();
+
+/* RNG (atomic) */
+__attribute__((noinline, regparm(1)))
+int32_t gd_randint(int32_t max);                    // EAX=max, returns [0,max)
+
+__attribute__((noinline))
+void gd_waitnextframe();
+
+gd_getpixel also exists as a confirmed device intrinsic in the compiler's opcode table, alongside the ones above; the device API is explicitly minimal and gets extended as new single-dispatch primitives are added.
+
+Tier A — atomic primitives. Each one completes within a single instruction dispatch (constant cost, no unrolling needed): pixel draw/read, the six-key input polls, gd_randint, and gd_waitnextframe (blocks until the next GD engine tick).
+
+Tier B — compile-time-expanded helpers. Built entirely from many Tier-A calls spread across many program-level instructions/CPU ticks — no sub-tick loops, just GCC-emitted branches/labels over Tier-A primitives. Categories: horizontal/vertical lines, rectangle outlines and fills, Bresenham line drawing, circle and filled circle (midpoint algorithm), sprite/bitmap blits (1-bit mono and indexed), and text via bitmap fonts. Concrete function names are still TBD in general, but bitmap-font text rendering specifically already has real work behind it in the repo (font_setup, font_setup.c, gd_font_meta.inc, gd_font_points.inc).
+
+7. Graphics & input configuration (systeminfo.json)
+Screen is a pre-placed 80×50 grid of small square objects. systeminfo.json's palette array maps a 1-indexed color identifier to an RGB triple; the screen-buffer item IDs (section 5b) hold identifiers, not raw colors.
+ticks_per_frame (in systeminfo.json) controls how many CPU steps happen between each screen redraw.
+GD natively only exposes 6 pollable keys (a/w/d/left/up/right). systeminfo.json's third field lets you opt into polling only a subset (by index) instead of paying the cost of polling all six by default — a very minor optimization.
+8. Compiler pipeline
+Compiled with GCC to 32-bit x86 asm using flags chosen to keep output flat and parseable:
+bash
+  gcc -S your_code.c -m32 -fno-ident -fno-pic -fno-pie -fomit-frame-pointer \
+      -fcf-protection=none -fno-stack-protector -fno-unwind-tables \
+      -fno-asynchronous-unwind-tables -o your_code.s
+bin/main.ml: lexes/parses the .s file (via lib/lexer, lib/parser, lib/ast), computes label→instruction-index references in one pass (main:'s labels first, then other functions in reverse file order — a real, deliberate-but-easy-to-forget ordering quirk both compiler passes must agree on), then emits the JSON IR to code.json.
+main.js: reads code.json + systeminfo.json, and for each instruction places the real GD trigger objects (Pickup Trigger, Item Edit Trigger, Spawn Trigger, Color Trigger, etc. — real GD OBJ_IDs, not ad-hoc) into a level save file via the G.js library.
+9. Current ISA
+
+(Restored from an earlier draft of this primer — flag if this section should be cut or reworked rather than kept as-is.)
+
+Implemented: addl, subl, cmpl, imull, idivl, cltd, notl, orl, andl, testl, xorl, sall/shll, sarl, shrl, movb/movw/movl, lea, push, pop, jmp + full conditional jump family, call, ret, halt, plus the device intrinsics from section 6. Deliberately out of scope for now: 8-bit/16-bit arithmetic and bitwise ops.
+
+10. Known open work / unfinished pieces
+
+(Also restored — same flag as above.)
+
+GUI (not started as of last work session).
+An efficient bitwise-operation implementation — open problem, no known good approach yet within GD's trigger primitives.
+A heap / malloc/free — intrinsic call slots for these already exist in the compiler's opcode table, but nothing is implemented behind them yet.
+Support for programs beyond ~9900 instructions (Sperner's-theorem-based group-reuse idea, deliberately deprioritized until it's actually needed).
+Some notes files contain stale or self-contradicting details (old CPU clock estimates, overlapping opcode helper-group ranges, a leal/popl group-numbering collision self-flagged in the source). When in doubt, the actual code wins over prose notes.
+11. Working conventions for whoever picks this up
+Ask rather than assume when something is ambiguous or when notes conflict with each other — this project has been built incrementally over a long time and not everything has been reconciled.
+The memory-layout regions in section 5 are structurally accurate, but for exact item-ID/group numbers within them, current instruction-set details, or the authoritative opcode/group table, read the actual source (bin/main.ml, lib/, notes/, README.md) rather than relying on memory of this document.

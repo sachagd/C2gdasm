@@ -1,4 +1,7 @@
 pour la division par le pickup trigger : 
-    - entre -2^23 et 2^23 c'est arrondi vers le plus proche puis après c'est arrondi vers 0 (en fait c'est un conséquence directe de l'imprécision sur les flottants)
+    - entre -2^23 et 2^23 c'est arrondi vers le plus proche puis après c'est arrondi vers 0 (en fait c'est une conséquence directe de l'imprécision sur les flottants)
 
-max extra groups used for instructions so far : 132 (use next one)
+multiplier par une constante par pickup trigger, additioner deux item id par un edit item trigger, multiplier par une constante avec un item edit trigger quand il y a un overflow hardset l'item id à : - 2 ^ 32
+par contre ajouter une constante par pickup trigger fonctionne tout à fait bien : l'overflow s'effectue proprement
+
+max extra groups used for instructions so far : 138 (use next one)

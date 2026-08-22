@@ -1,4 +1,4 @@
-	subl	$12, %esp
+²	subl	$12, %esp
 	movl	20(%esp), %edx
 	addl	%edx, %eax
 	leal	(%edx,%eax), %ecx

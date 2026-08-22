@@ -23,7 +23,7 @@ $.exportConfig({
                 OBJ_ID: 1268,
                 X: 465,
                 Y: 1095,
-                TARGET: group(77 + 3 * keybinds[i]),
+                TARGET: group(277 + 3 * keybinds[i]),
                 SPAWN_TRIGGERED: true,
                 MULTI_TRIGGER: true,
                 GROUPS: group(200),

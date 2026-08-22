@@ -1,0 +1,39 @@
+addl when first arg is an immediate
+addl when first arg is a register
+subl when first arg is an immediate
+subl when first arg is a register
+cmpl when first arg is an immediate
+cmpl when first arg is a register
+idivl at different scale to verify issue mentionned
+orl when first arg is an immediate
+orl when first arg is a register
+andl when first arg is an immediate
+andl when first arg is a register
+jmp
+je/jz
+jne/jnzk
+js
+jns
+jo
+jno
+jc
+jnc
+jge/jnl
+jnge/jl
+jle/jng
+jnle/jg
+leave
+call
+sall/shll
+sarl
+shrl
+cltd
+
+note that OF and CF update has not been implemented for all instructions so you can test that it behaves correctly based on the info below, eg, for CF as it has not been implemented for any instructions it must stay at 0
+Therefore jc and jnc behave as they should but they will in the context of CF not being able to be equal to 1 
+
+ZF : same things for all instructions so only need to be tested once
+SF : same things for all instructions so only need to be tested once
+OF : addl, subl, cmpl, sall/shll, andl, orl, testl, xorl, sarl, shrl
+
+Do multiple tests for each, the goal is to verify everything works as intended
