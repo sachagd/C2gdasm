@@ -131,19 +131,6 @@ bin/main.ml: lexes/parses the .s file (via lib/lexer, lib/parser, lib/ast), comp
 main.js: reads code.json + systeminfo.json, and for each instruction places the real GD trigger objects (Pickup Trigger, Item Edit Trigger, Spawn Trigger, Color Trigger, etc. — real GD OBJ_IDs, not ad-hoc) into a level save file via the G.js library.
 9. Current ISA
 
-(Restored from an earlier draft of this primer — flag if this section should be cut or reworked rather than kept as-is.)
 
 Implemented: addl, subl, cmpl, imull, idivl, cltd, notl, orl, andl, testl, xorl, sall/shll, sarl, shrl, movb/movw/movl, lea, push, pop, jmp + full conditional jump family, call, ret, halt, plus the device intrinsics from section 6. Deliberately out of scope for now: 8-bit/16-bit arithmetic and bitwise ops.
 
-10. Known open work / unfinished pieces
-
-(Also restored — same flag as above.)
-
-GUI (not started as of last work session).
-An efficient bitwise-operation implementation — open problem, no known good approach yet within GD's trigger primitives.
-A heap / malloc/free — intrinsic call slots for these already exist in the compiler's opcode table, but nothing is implemented behind them yet.
-Support for programs beyond ~9900 instructions (Sperner's-theorem-based group-reuse idea, deliberately deprioritized until it's actually needed).
-Some notes files contain stale or self-contradicting details (old CPU clock estimates, overlapping opcode helper-group ranges, a leal/popl group-numbering collision self-flagged in the source). When in doubt, the actual code wins over prose notes.
-11. Working conventions for whoever picks this up
-Ask rather than assume when something is ambiguous or when notes conflict with each other — this project has been built incrementally over a long time and not everything has been reconciled.
-The memory-layout regions in section 5 are structurally accurate, but for exact item-ID/group numbers within them, current instruction-set details, or the authoritative opcode/group table, read the actual source (bin/main.ml, lib/, notes/, README.md) rather than relying on memory of this document.

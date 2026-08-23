@@ -7,7 +7,7 @@ gd_draw_text:
 	movl	%esp, %ebp
 	subl	$72, %esp
 #APP
-# 38 "framework.c" 1
+# 46 "framework.c" 1
 	movl %esi, %edx
 movl %edi, %eax
 

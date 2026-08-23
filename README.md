@@ -95,7 +95,7 @@ What i'm doing right now :
     - OF (addl, subl, cmpl, sall/shll, sarl, shrl, andl, orl, xorl, testl) : 164-174
 
     - BIOS : 200-204
-    - screen refresh : 205-205 + len(palette) -> max 45 colors
+    - screen refresh : 205-205 + len(palette) -> max 75 colors
 
     - input pooling : 280-297
 
@@ -151,12 +151,13 @@ What i'm doing right now :
                 i9999 = -1 //a 31 bits signed right shift on a negative integer always equal -1
             else 
                 i9999 = 0 //a 31 bits signed right shift on a positive integer always equal 0 
-        else
+        else //if shift != 31
             i9999 = flr(i9998 / i9996) //perform regular signed right shift
 
     sall/shll : 
         toggle g124 //toggle all spawn trigger
         i9999 = i9998
+        i9980 = i9996 //for OF computation
         g124 () = //one shift
             if i9996 > 0 then //if we still need to shift 
                 if abs(i9999 / 32768) <= 32768 then //if the shift won't cause an overflow
@@ -171,14 +172,14 @@ What i'm doing right now :
     shrl : 
         i9996 contains 2^shift if shift < 31 else -1 because iids cannot hold 2^31
 
-        if i9996 != -1 then 
-            i9999 = flr(i9998 / i9996)
-            if i9998 < 0 then
+        i9980 = i9998 //for OF computation
+        if i9996 != -1 then //if shift != 31
+            i9999 = flr(i9998 / i9996) //do signed right shift only work for positive integers
+            if i9998 < 0 then //else the following math adjust the result (it's not trivial but easily provable)
                 if 9996 != 2 then 
                     i9998 = -2147482648
                     i9998 = flr(i9998 / i9996)
-                    i9998 = i9998 * -2
-                    i9999 = i9999 + i9998
+                    i9999 = i9999 + i9998 * -2
                 else
                     i9999 = i9999 + -2147483648
         else //if shift = 31
@@ -195,25 +196,51 @@ What i'm doing right now :
 
 
 # Flags update :
-    zero flag : 
-        for all operation test if iid 9991 is equal to 0  
+    zero flag (ZF) : 
+        all ops :  
+            if i9999 = 0 then
+                i9991 = 1
+            else 
+                i9991 = 0   
 
-    sign flag : 
-        for all operation test if iid 9992 is strictly less than 0 
+    sign flag (SF) : 
+        all ops : 
+            if i9999 < 0 then 
+                i9992 = 1
+            else
+                i9992 = 0
 
-    overflow flag : 
+    overflow flag (OF) : 
         add :
 
 
         and, test, xor :  
             bitwise operation cannot cause an overflow therefore it sets OF to 0
         
-        sall/shll:
-            if i9980 = 1 then 
-                if (i9999 < 0 && i9998 > -1) || (i9999 > -1 && i9998 < 0) then 
-                    i9993 = 1
+        sarl :
+            if i9996 = 2 then
                 i9993 = 0
 
+        sall/shll:
+            i9980 = i9996 //for OF computation
+
+            if i9980 = 1 then 
+                i9993 = 0
+                if i9999 < 0 then
+                    if i9998 > -1 then
+                        i9993 = 1
+                if i9999 > -1 then 
+                    if i9998 < 0 then 
+                        i9993 = 1
+        
+        shrl :
+            i9980 = i9998 //for OF computation
+
+            if i9996 = 2 then 
+                if i9980 < 0 then
+                    i9993 = 1
+                else 
+                    i9993 = 0
 
     carry flag : 
         add : (src < 0 && dst < 0) || (src < 0 && dst >= 0 && src + dst >= 0) || (src >= 0 && dst < 0 && src + dst >= 0)

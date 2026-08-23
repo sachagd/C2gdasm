@@ -155,8 +155,6 @@ let sinstructionf code label_references is_main instruction =
   
   (*  opcode 23 plus utilisé *)
 
-  |Cltd -> code := [[|56|]]::!code (* changer le 56 plus tard*)
-
   |Movl(src, dst) -> twoarg_instruction src dst code insts 24
 
   |Pushl(op) ->
@@ -164,15 +162,9 @@ let sinstructionf code label_references is_main instruction =
     argumentf op insts 0;
     code := !insts::!code
   
-  |Popl(op) ->
-    insts := [|28 + inst_type op|]::!insts;
+  |Popl(op) -> (* pop ne peut pas recevoir d'immédiat donc 29 est libre *)
+    insts := [|28|]::!insts;
     argumentf op insts 0;
-    code := !insts::!code
-
-  |Leal(src, dst) ->
-    insts := [|29|]::!insts;
-    argumentf dst insts 2;
-    argumentf src insts 0;
     code := !insts::!code
 
   |Jmp(target) -> code := [[|100; 9995; firstinstrgroup + get_label target label_references|]; [|30|]]::!code;
@@ -195,10 +187,22 @@ let sinstructionf code label_references is_main instruction =
   |Jle(target) |Jng(target) -> code := [[|100; 9995; firstinstrgroup + get_label target label_references|]; [|41|]]::!code;
   |Jnle(target) |Jg(target) -> code := [[|100; 9995; firstinstrgroup + get_label target label_references|]; [|42|]]::!code;
 
-  |Ret -> if is_main then code := [[|43|]]::!code else code := [[|44|]]::!code
+  |Ret -> 
+    if is_main then 
+      code := [[|43|]]::!code 
+    else 
+      code := [[|44|]]::!code
 
   |Leave -> code := [[|45|]]::!code
+
+  |Cltd -> code := [[|46|]]::!code
   
+  |Leal(src, dst) ->
+    insts := [|47|]::!insts;
+    argumentf dst insts 2;
+    argumentf src insts 0;
+    code := !insts::!code
+
   |Nop -> ()
 
   |Call(target) ->
@@ -348,7 +352,21 @@ let print_program prog =
 
 
 let () =
-  let filename = "verif.s" in
+  if Array.length Sys.argv <> 2 then begin
+    Printf.eprintf "Usage: %s <source.c>\n" Sys.argv.(0);
+    exit 1
+  end;
+
+  let source = Sys.argv.(1) in
+  let cmd = Printf.sprintf "gcc -S %s -O0 -m32 -fno-ident -fno-pic -fno-pie -fno-omit-frame-pointer -fcf-protection=none -fno-stack-protector -fno-unwind-tables -fno-asynchronous-unwind-tables" source in
+
+  (match Sys.command cmd with
+  | 0 -> ()
+  | code ->
+      Printf.eprintf "gcc failed with exit code %d\n" code;
+      exit code);
+
+  let filename = Filename.chop_extension source ^ ".s" in
   let channel = open_in filename in
   let lexbuf = Lexing.from_channel channel in
   let ast = Parser.program Lexer.token lexbuf in

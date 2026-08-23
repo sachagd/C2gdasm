@@ -73,7 +73,7 @@ $.exportConfig({
                         SPAWN_TRIGGERED: true,
                         MULTI_TRIGGER: true,
                         OVERRIDE_COUNT: true,
-                        GROUPS: [group(firstinstrgroup + i), group(firstinstrgroup + n)],
+                        GROUPS: [group(firstinstrgroup + i)],
                     }))
                 }
                 else if (inst[0] == 101){
@@ -88,7 +88,7 @@ $.exportConfig({
                         MOD: 1,
                         SPAWN_TRIGGERED: true,
                         MULTI_TRIGGER: true,
-                        GROUPS: [group(firstinstrgroup + i), group(firstinstrgroup + n)],
+                        GROUPS: [group(firstinstrgroup + i)],
                     }))
                 }
                 else if (inst[0] == 102){
@@ -100,7 +100,7 @@ $.exportConfig({
                         ITEM: inst[1],
                         SPAWN_TRIGGERED: true,
                         MULTI_TRIGGER: true,
-                        GROUPS: [group(firstinstrgroup + i), group(firstinstrgroup + n)],
+                        GROUPS: [group(firstinstrgroup + i)],
                     }))
                 }
                 else if (inst[0] == 103){
@@ -116,7 +116,7 @@ $.exportConfig({
                         MOD: 1,
                         SPAWN_TRIGGERED: true,
                         MULTI_TRIGGER: true,
-                        GROUPS: [group(firstinstrgroup + i), group(firstinstrgroup + n)],
+                        GROUPS: [group(firstinstrgroup + i)],
                     }))
                 }
                 else if (inst[0] == 104){
@@ -129,7 +129,7 @@ $.exportConfig({
                         MULT_DIV: 1,
                         SPAWN_TRIGGERED: true,
                         MULTI_TRIGGER: true,
-                        GROUPS: [group(firstinstrgroup + i), group(firstinstrgroup + n)],
+                        GROUPS: [group(firstinstrgroup + i)],
                     }))
                 }
             }
@@ -140,7 +140,7 @@ $.exportConfig({
                 TARGET: group(instructions[i][p][0]),
                 SPAWN_TRIGGERED: true,
                 MULTI_TRIGGER: true,
-                GROUPS: [group(firstinstrgroup + i), group(firstinstrgroup + n)],
+                GROUPS: [group(firstinstrgroup + i)],
             }))
         }
         // for (let i = 0; i < 20; i++){

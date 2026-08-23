@@ -1,0 +1,32 @@
+Here are the goal you must follow to write your C code : 
+
+    - To prevent gcc from using leal to compute anything other than memory addresses you can't inline arithmetic expression in array indexation, functions call... or doing multiple at once
+    For instance, here is what you should do : 
+
+    Don't do : 
+        
+        i32 ind = type * 16 + rot * 4;
+
+    Do : 
+        
+        i32 t1 = type * 16;
+        i32 t2 = rot * 4;
+        i32 ind = t1 + t2;
+
+    Don't do :
+
+        i32 y = f(x + 1);
+
+    Do : 
+
+        i32 x' = x + 1;
+        i32 y = f(x');
+
+    Don't do : 
+
+        i32 val = arr[4 * ind];
+
+    Do :    
+
+        i32 ind' = 4 * ind;
+        i32 val = arr[ind']
