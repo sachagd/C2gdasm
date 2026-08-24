@@ -5,23 +5,19 @@ If you want to see what this project is able to do, here's a [video](https://x.c
 As of now, the instruction set is : 
 
     - addl, subl, cmpl, imull, idivl, cltd 
-    - notl, orl, andl, testl, xorl, sall/shll, sarl, shrl
+    - notl (not yet), orl, andl, testl, xorl (not yet), sall/shll, sarl, shrl
     - jmp, je/jz, jne/jnz, js, jns, jo, jno, jc, jnc, jge/jnl, jnge/jl, jle/jng, jnle/jg
-    - movb, movw, movl, lea, push, pop
-    - call, ret, halt
+    - movl, leal, pushl, popl
+    - call, leave, ret, halt, nop
 
 Arithmetic operations and bitwise operations on 8bits and 16 bits registers will probably not be implemented
 
 What i'm doing right now : 
 
-    adding a GUI
     finding optimised way to do bitwise operation (if you know a way to do that i'm interested, dm me on discord)
     creating a heap (stopped doing that but will do it eventually)
 
 ## A modest attempt at doing some sort of documentation/explanation : 
-
-# Vocabulary :
-    iid : item id
 
 # iid layout : 
     1 - 4001 : screen memory buffer
@@ -52,7 +48,7 @@ What i'm doing right now :
     - andl : 13-14 + 119-120
     - testl opti : 15
     - testl : 16-17
-    - xorl : 18-19 + 130-132
+    - xorl : 18-19
     - sall/shll : 20 + 124-129
     - sarl : 21 + 137-140
     - shrl : 22 + 130-136
@@ -100,48 +96,95 @@ What i'm doing right now :
     - input pooling : 280-297
 
     - code : 300-9999 
+    - screen : 301-4300
 
 # Extra info : 
     esp is set at 9971 at the very beginning which match the very top of the memory 
 
 # Cpu cycle : 
     Set instruction arguments :
-        iid 9995 = source
-        iid 9997 = destination
+        i9995 = source
+        i9997 = destination
 
     Copy argument : 
         source :
             source is an immediate : 
-                iid 9996 = iid 9995
+                i9996 = i9995
             source is a register : 
-                iid 9996 = *(iid 9995)
+                i9996 = *(i9995)
 
         destination : 
             destination can only be a register
-            iid 9998 = *(iid 9997)
+            i9998 = *(i9997)
 
     Instructions
 
     Flags update
 
     Save output : 
-        *(iid 9997) = iid 9999
+        *(i9997) = i9999
 
 # Instructions : 
-    add : 
-        iid 9999 = iid 9998 + iid 9996
+    addl : 
+        i9999 = i9998 + i9996
+        if i9999 = -2147483648 then 
+            i9980 = i9996 
+            i9980 = i9980 + -2147483648
+            i9981 = i9998
+            i9981 = i9981 + -2147483648
+            i9999 = i9981 + i9980
 
-    sub/cmp :
-        iid 9999 = iid 9998 - iid 9996 
+    subl-cmpl :
+        i9999 = i9998 - i9996 
+        if i9999 = -2147483648 then 
+            i9980 = i9996 
+            i9980 = i9980 + -2147483648
+            i9981 = i9998
+            i9981 = i9981 + -2147483648
+            i9999 = i9981 - i9980
     
-    wait : 
-        if i9973 != 0 then //we want to wait 
-            i9972 = 1 //we register being in the waiting state
-            i9982 = i9982 - 1 //we wait
-        else //we don't want to wait anymore
-            if i9972 = 0 then //we are already out of the waiting state meaning computation was very quick
-                i9982 = i9982 - 1 //we wait
-            i9972 = 0 //we are out of the waiting state
+    idivl :
+        i9981 = i9983 / *(i9995)
+        i9986 = *(i9995) * i9981
+        i9986 = i9983 - i9986
+        i9983 = i9981
+
+    orl : 
+        i9996 = i9996 + 1 //  P ∨ Q = ¬(¬ P ∧ ¬ Q)
+        i9996 = i9996 * -1
+        i9998 = i9998 + 1
+        i9998 = i9998 * -1
+        g121()
+        i9999 = i9999 + 1
+        i9999 = i9999 * -1
+
+    andl-testl : 
+        g121() = 
+            g119 () = 
+                i9996 = i9996 + -2^i
+            g120 () =
+                i9998 = i9998 + -2^i
+            g119 & g120 ()
+                i9999 = i9999 + 2^i
+
+            i9990 = 0
+            toggle g119()
+            toggle g120()
+            if i9996 > -1 then 
+                untoggle g119()
+            if i9998 > -1 
+                untoggle g120()
+            g119()
+            g120()
+            for i in range(30, 0, -1) do //there isn't really a loop, it's completely unrolled
+                toggle g119()
+                toggle g120()
+                if i9996 < 2^i then 
+                    untoggle g119()
+                if i9998 < 2^i 
+                    untoggle g120()
+                g119()
+                g120()
 
     sarl : 
         i9996 contains 2^shift if shift < 31 else -1 because iids cannot hold 2^31
@@ -155,9 +198,6 @@ What i'm doing right now :
             i9999 = flr(i9998 / i9996) //perform regular signed right shift
 
     sall/shll : 
-        toggle g124 //toggle all spawn trigger
-        i9999 = i9998
-        i9980 = i9996 //for OF computation
         g124 () = //one shift
             if i9996 > 0 then //if we still need to shift 
                 if abs(i9999 / 32768) <= 32768 then //if the shift won't cause an overflow
@@ -168,6 +208,11 @@ What i'm doing right now :
                 i9996 = i9996 + -1 //we did the shift
             else //all shift done
                 untoggle g124 //untoggle all other spawn trigger
+
+        toggle g124 //toggle all spawn trigger
+        i9999 = i9998
+        i9980 = i9996 //for OF computation
+        g124() * 2048
 
     shrl : 
         i9996 contains 2^shift if shift < 31 else -1 because iids cannot hold 2^31
@@ -188,11 +233,105 @@ What i'm doing right now :
             else 
                 i9999 = 0 //a 31 bits unsigned right shift on a negative integer always equal 0
 
+    pushl : 
+        i9990 = i9990 - 1
+        *(i9990) = i9996
+
+    popl : 
+        *(i9995) = *(i9990)
+        i9990 = i9990 + 1
+
+    jmp : 
+        i9982 = i9995
+    
+    je/jz : 
+        if i9991 = 1 then 
+            i9982 = i9995
+    
+    jne/jnz : 
+        if i9991 = 0 then 
+            i9982 = i9995
+
+    js : 
+        if i9992 = 1 then 
+            i9982 = i9995
+    
+    jns : 
+        if i9992 = 0 then
+            i9982 = i9995
+
+    jo : 
+        if i9993 = 1 then 
+            i9982 = i9995
+    
+    jno : 
+        if i9993 = 0 then
+            i9982 = i9995
+
+    jc : 
+        if i9994 = 1 then 
+            i9982 = i9995
+    
+    jnc : 
+        if i9994 = 0 then
+            i9982 = i9995
+
+    jge/jnl : 
+        if i9993 = i9992 then 
+            i9982 = i9995
+    
+    jnge/jl : 
+        if i9993 != i9992 then
+            i9982 = i9995
+    
+    jle/jng : 
+        if i9993 != i9992 then 
+            i9982 = i9995
+        if i9991 = 1 then 
+            i9982 = i9995
+    
+    jnle/jg : 
+        g100 () = 
+            i9982 = i9995
+
+        if i9993 != i9992 then
+            untoggle g100
+        if i9991 = 1 then 
+            untoggle g100
+        g100()
+        toggle g100
+    
+    halt : 
+        untoggle g201
+
+    ret : 
+        i9982 = *(i9990)
+        i9990 = i9990 + 1
+    
+    leave : 
+        i9990 = i9989
+        i9989 = *(i9990)
+        i9990 = i9990 + 1
+
+    call : 
+        i9990 = i9990 - 1
+        *(i9990) = i9982
+        i9982 = i9995
+
     cltd: 
         if i9983 >= 0 then 
             i9986 = 0
         else 
             i9986 = -1
+
+    wait : 
+        if i9973 != 0 then //we want to wait 
+            i9972 = 1 //we register being in the waiting state
+            i9982 = i9982 - 1 //we wait
+        else //we don't want to wait anymore
+            if i9972 = 0 then //we are already out of the waiting state meaning computation was very quick
+                i9982 = i9982 - 1 //we wait
+            i9972 = 0 //we are out of the waiting state
 
 
 # Flags update :
